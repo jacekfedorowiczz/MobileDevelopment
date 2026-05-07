@@ -1,3 +1,8 @@
 <Solution>
-  <Project Path="MobileDevelopment.API.csproj" />
+  <Project Path="D:/MobileDevelopment/API/MobileDevelopment.API.Domain/MobileDevelopment.API.Domain.csproj" Id="595adf44-0347-4a39-9a5d-52804fadd48a" />
+  <Project Path="D:/MobileDevelopment/API/MobileDevelopment.API.Models/MobileDevelopment.API.Models.csproj" Id="95d5305b-e8cf-47de-9ba7-652b819eed8a" />
+  <Project Path="D:/MobileDevelopment/API/MobileDevelopment.API.Persistence/MobileDevelopment.API.Persistence.csproj" Id="f08efa5e-c661-47e5-8fad-98f7efde772f" />
+  <Project Path="D:/MobileDevelopment/API/MobileDevelopment.API.Services/MobileDevelopment.API.Services.csproj" Id="c772f6b6-4e2e-49f5-8115-76eec65ae0da" />
+  <Project Path="D:/MobileDevelopment/API/MobileDevelopment.API.UnitTests/MobileDevelopment.API.UnitTests.csproj" Id="73a25770-9748-461a-be8e-d9db79c9f3e1" />
+  <Project Path="D:/MobileDevelopment/API/MobileDevelopment.API/MobileDevelopment.API.csproj" />
 </Solution>

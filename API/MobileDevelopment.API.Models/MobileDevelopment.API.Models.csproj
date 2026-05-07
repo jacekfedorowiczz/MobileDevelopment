@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="DTO\Exercises\" />
+    <Folder Include="DTO\MuscleGroups\" />
+    <Folder Include="DTO\WorkoutSets\" />
+    <Folder Include="DTO\Profiles\" />
+    <Folder Include="Contracts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MobileDevelopment.API.Domain\MobileDevelopment.API.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
