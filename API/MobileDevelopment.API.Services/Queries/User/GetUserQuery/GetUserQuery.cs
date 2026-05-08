@@ -4,7 +4,7 @@ using MobileDevelopment.API.Models.DTO.Users;
 using MobileDevelopment.API.Models.Wrappers;
 using MobileDevelopment.API.Services.Interfaces;
 
-namespace MobileDevelopment.API.Services.Queries.GetUserQuery
+namespace MobileDevelopment.API.Services.Queries.User.GetUserQuery
 {
     public sealed record GetUserQuery(int Id) : IRequest<Result<UserDto>>;
     

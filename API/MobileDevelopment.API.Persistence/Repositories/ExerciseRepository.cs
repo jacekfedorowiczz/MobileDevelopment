@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using MobileDevelopment.API.Domain.Entities;
+using MobileDevelopment.API.Persistence.Context;
+using MobileDevelopment.API.Persistence.Interfaces;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    internal class ExerciseRepository
+    public class ExerciseRepository(SystemContext context)
+        : Repository<Exercise>(context), IExerciseRepository
     {
     }
 }

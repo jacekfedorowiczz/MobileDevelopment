@@ -1,4 +1,4 @@
-using Asp.Versioning; // Wymagane dla nowej wersji ApiVersioning
+using Asp.Versioning;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,7 +13,7 @@ using MobileDevelopment.API.Persistence.Context;
 using MobileDevelopment.API.Persistence.Extensions;
 using MobileDevelopment.API.Services.Communication;
 using MobileDevelopment.API.Services.Extensions;
-using MobileDevelopment.API.Services.Queries.GetUserQuery;
+using MobileDevelopment.API.Services.Queries.User.GetUserQuery;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;

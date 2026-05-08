@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using MobileDevelopment.API.Services.Analytics;
 using MobileDevelopment.API.Services.Calculators;
+using MobileDevelopment.API.Services.Interfaces;
+using MobileDevelopment.API.Services.Services;
 using MobileDevelopment.API.Services.Services.Background;
 using MobileDevelopment.API.Services.Services.Calculators;
 using MobileDevelopment.API.Services.Services.Facades;
@@ -13,6 +15,19 @@ namespace MobileDevelopment.API.Services.Extensions
         {
             services.AddHttpContextAccessor();
 
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<IExerciseService, ExerciseService>();
+            services.AddScoped<IMuscleGroupService, MuscleGroupService>();
+            services.AddScoped<IWorkoutSessionService, WorkoutSessionService>();
+            services.AddScoped<IWorkoutSetService, WorkoutSetService>();
+            services.AddScoped<IDietService, DietService>();
+            services.AddScoped<IDietDayService, DietDayService>();
+            services.AddScoped<IMealService, MealService>();
+            services.AddScoped<IPostService, PostService>();
+            services.AddScoped<IPostLikeService, PostLikeService>();
+            services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<ITagService, TagService>();
 
             services.AddScoped<IWorkoutAnalyticsFacade, WorkoutAnalyticsFacade>();
             services.AddScoped<IFatigueCalculator, FatigueCalculator>();

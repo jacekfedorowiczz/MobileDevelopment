@@ -1,4 +1,5 @@
-﻿using MobileDevelopment.API.Models.DTO.Users;
+using MobileDevelopment.API.Models.DTO.Users;
+using MobileDevelopment.API.Models.Extensions;
 using MobileDevelopment.API.Models.Wrappers;
 using MobileDevelopment.API.Persistence.Interfaces;
 using MobileDevelopment.API.Services.Interfaces;
@@ -22,8 +23,7 @@ namespace MobileDevelopment.API.Services.Services
                 return Result<UserDto>.Failure("Cannot find the user with the specified id.");
             }
 
-            var dto = new UserDto(id, user.FirstName, user.LastName, user.Email, user.MobilePhone, user.CreatedAt, user.ProfileId);
-            return Result<UserDto>.Success(dto);
+            return Result<UserDto>.Success(user.ToDto());
         }
     }
 }

@@ -53,6 +53,21 @@ namespace MobileDevelopment.API.Persistence.Extensions
             });
 
             services.AddScoped(typeof(IBaseEntityRepository<>), typeof(Repository<>));
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IProfileRepository, ProfileRepository>();
+            services.AddScoped<IExerciseRepository, ExerciseRepository>();
+            services.AddScoped<IMuscleGroupRepository, MuscleGroupRepository>();
+            services.AddScoped<IWorkoutSessionRepository, WorkoutSessionRepository>();
+            services.AddScoped<IWorkoutSetRepository, WorkoutSetRepository>();
+            services.AddScoped<IDietRepository, DietRepository>();
+            services.AddScoped<IDietDayRepository, DietDayRepository>();
+            services.AddScoped<IMealRepository, MealRepository>();
+            services.AddScoped<IPostRepository, PostRepository>();
+            services.AddScoped<IPostLikeRepository, PostLikeRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
+            services.AddScoped<ITagRepository, TagRepository>();
+
             return services;
         }
     }
