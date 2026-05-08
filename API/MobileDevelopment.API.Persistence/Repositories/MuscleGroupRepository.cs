@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using MobileDevelopment.API.Domain.Entities;
+using MobileDevelopment.API.Persistence.Context;
+using MobileDevelopment.API.Persistence.Interfaces;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    internal class MuscleGroupRepository
+    public class MuscleGroupRepository(SystemContext context)
+        : Repository<MuscleGroup>(context), IMuscleGroupRepository
     {
     }
 }

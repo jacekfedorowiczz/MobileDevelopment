@@ -22,6 +22,9 @@ namespace MobileDevelopment.API.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(128);
 
+            builder.Property(u => u.DateOfBirth)
+                .IsRequired();
+
             builder.Property(u => u.Email)
                 .IsRequired()
                 .HasMaxLength(256);

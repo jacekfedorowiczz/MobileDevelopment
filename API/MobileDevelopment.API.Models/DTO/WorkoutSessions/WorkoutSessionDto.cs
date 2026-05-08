@@ -1,11 +1,21 @@
-﻿namespace MobileDevelopment.API.Models.DTO.WorkoutSessions
+namespace MobileDevelopment.API.Models.DTO.WorkoutSessions
 {
-    public record WorkoutSessionDto(
-            int Id,
-            string Name,
-            DateTime StartTime,
-            DateTime? EndTime,
-            int? GlobalSessionRpe,
-            int TotalSetsCount
-        );
+    public sealed record WorkoutSessionDto(
+        int Id,
+        int UserId,
+        string Name,
+        string? Description,
+        DateTime StartTime,
+        DateTime? EndTime,
+        int? GlobalSessionRpe
+    );
+
+    public sealed record CreateEditWorkoutSessionDto(
+        int UserId,
+        string Name,
+        string? Description,
+        DateTime StartTime,
+        DateTime? EndTime,
+        int? GlobalSessionRpe
+    );
 }

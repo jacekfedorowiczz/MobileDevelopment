@@ -174,14 +174,15 @@ namespace MobileDevelopment.API.Persistence.Seeding
             {
                 var user = new User
                 {
-                    Login        = u.Login,
-                    FirstName    = u.First,
-                    LastName     = u.Last,
-                    Email        = u.Email,
-                    MobilePhone  = u.Phone,
-                    Role         = u.Role,
-                    CreatedAt    = DateTime.UtcNow,
+                    Login = u.Login,
+                    FirstName = u.First,
+                    LastName = u.Last,
+                    Email = u.Email,
+                    MobilePhone = u.Phone,
+                    Role = u.Role,
+                    CreatedAt = DateTime.UtcNow,
                     PasswordHash = string.Empty,
+                    DateOfBirth = new DateOnly(1996,02,29)
                 };
                 user.PasswordHash = hasher.HashPassword(user, u.Password);
                 return user;

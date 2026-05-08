@@ -12,6 +12,7 @@ namespace MobileDevelopment.API.Domain.Entities
         public required string MobilePhone { get; set; }
         public required string PasswordHash { get; set; }
         public required DateTime CreatedAt { get; set; }
+        public required DateOnly DateOfBirth { get; set; }
 
         public Role Role { get; set; } = Role.User;
         public int ProfileId { get; set; }
@@ -19,5 +20,21 @@ namespace MobileDevelopment.API.Domain.Entities
         public ICollection<WorkoutSession> Sessions { get; set; } = [];
 
         public string FullName => $"{FirstName} {LastName}";
+
+        public int Age
+        {
+            get
+            {
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var age = today.Year - DateOfBirth.Year;
+
+                if (DateOfBirth > today.AddYears(-age))
+                {
+                    age--;
+                }
+
+                return age;
+            }
+        }
     }
 }
