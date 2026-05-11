@@ -1,8 +1,11 @@
 // src/screens/ProfileScreen.tsx
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, Pressable, Modal, TouchableWithoutFeedback, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { Colors, Spacing } from '../theme/theme';
+import { Spacing } from '../theme/theme';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { launchCamera, launchImageLibrary, ImagePickerResponse } from 'react-native-image-picker';
 
 const stats = [
   { label: "Treningi w tym miesiącu", value: "24", icon: "calendar" },
@@ -17,152 +20,189 @@ const achievements = [
   { name: "Marathon", description: "200 treningów", unlocked: false },
 ];
 
-const posts = [
-  { id: 1, title: "Poranny bieg wokół jeziora", date: "2 dni temu", likes: 14 },
-  { id: 2, title: "Nowy rekord w martwym ciągu!", date: "5 dni temu", likes: 32 },
-];
-
 export default function ProfileScreen() {
-  const logout = () => {
-    // Auth context logout placeholder
+  const { logout } = useAuth();
+  const { colors, isDark } = useTheme();
+  const [profileImage, setProfileImage] = useState("https://images.unsplash.com/photo-1613145997970-db84a7975fbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200");
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleImagePickerResponse = (response: ImagePickerResponse) => {
+    if (response.didCancel) return;
+    if (response.errorCode) {
+      Alert.alert('Błąd', response.errorMessage || 'Wystąpił błąd podczas wybierania zdjęcia');
+      return;
+    }
+    if (response.assets && response.assets.length > 0) {
+      const uri = response.assets[0].uri;
+      if (uri) {
+        setProfileImage(uri);
+        // Tu docelowo wyślesz zdjęcie na backend używając np. FormData
+        console.log('Nowe zdjęcie gotowe do wysyłki:', uri);
+      }
+    }
+    setModalVisible(false);
+  };
+
+  const openCamera = () => {
+    launchCamera({ mediaType: 'photo', quality: 0.8 }, handleImagePickerResponse);
+  };
+
+  const openGallery = () => {
+    launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, handleImagePickerResponse);
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.scrollContent}>
       <View style={styles.profileHeader}>
-        <Image
-          source={{ uri: "https://images.unsplash.com/photo-1613145997970-db84a7975fbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200" }}
-          style={styles.profileImage}
-        />
-        <Text style={styles.userName}>Jan Kowalski</Text>
-        <Text style={styles.userEmail}>jan.kowalski@email.com</Text>
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: profileImage }}
+            style={[styles.profileImage, { borderColor: '#2563eb' }]}
+          />
+          <Pressable style={styles.editImageBadge} onPress={() => setModalVisible(true)}>
+            <Icon name="camera" size={16} color="#fff" />
+          </Pressable>
+        </View>
+        <Text style={[styles.userName, { color: colors.foreground }]}>Jan Kowalski</Text>
+        <Text style={[styles.userEmail, { color: colors.mutedForeground }]}>jan.kowalski@email.com</Text>
       </View>
 
       <View style={styles.statsContainer}>
         {stats.map((stat, i) => (
-          <View key={i} style={styles.statCard}>
+          <View key={i} style={[styles.statCard, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
             <View>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{stat.label}</Text>
+              <Text style={[styles.statValue, { color: colors.foreground }]}>{stat.value}</Text>
             </View>
-            <View style={styles.statIconWrapper}>
-              <Icon name={stat.icon} size={28} color={Colors.primary} />
-            </View>
-          </View>
-        ))}
-      </View>
-
-      <Text style={styles.sectionTitle}>Twoje posty</Text>
-      <View style={styles.postsContainer}>
-        {posts.map(post => (
-          <View key={post.id} style={styles.postCard}>
-            <View style={styles.postHeader}>
-              <Text style={styles.postTitle}>{post.title}</Text>
-              <Text style={styles.postDate}>{post.date}</Text>
-            </View>
-            <View style={styles.postActions}>
-              <View style={styles.actionItem}>
-                <Icon name="heart" size={16} color={Colors.destructive} />
-                <Text style={styles.actionText}>{post.likes}</Text>
-              </View>
-              <View style={styles.actionItem}>
-                <Icon name="message-square" size={16} color={Colors.mutedForeground} />
-                <Text style={styles.actionText}>Komentarze</Text>
-              </View>
+            <View style={[styles.statIconWrapper, { backgroundColor: isDark ? '#1e293b' : '#eff6ff' }]}>
+              <Icon name={stat.icon} size={28} color="#2563eb" />
             </View>
           </View>
         ))}
       </View>
 
       <View style={styles.quickActionsContainer}>
-        <Pressable style={styles.quickActionCard}>
-          <View style={styles.quickActionIconWrapper}>
-            <Icon name="activity" size={20} color={Colors.primary} />
+        <Pressable style={[styles.quickActionCard, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
+          <View style={[styles.quickActionIconWrapper, { backgroundColor: isDark ? '#1e293b' : '#eff6ff' }]}>
+            <Icon name="activity" size={20} color="#2563eb" />
           </View>
-          <Text style={styles.quickActionTitle}>Twoja dieta</Text>
+          <Text style={[styles.quickActionTitle, { color: colors.foreground }]}>Twoja dieta</Text>
           <View style={styles.quickActionFooter}>
-            <Text style={styles.quickActionSubtitle}>Zarządzaj planem</Text>
-            <Icon name="chevron-right" size={12} color={Colors.mutedForeground} />
+            <Text style={[styles.quickActionSubtitle, { color: colors.mutedForeground }]}>Zarządzaj planem</Text>
+            <Icon name="chevron-right" size={12} color={colors.mutedForeground} />
           </View>
         </Pressable>
-        <Pressable style={styles.quickActionCard}>
-          <View style={styles.quickActionIconWrapper}>
-            <Icon name="clipboard" size={20} color={Colors.primary} />
+        <Pressable style={[styles.quickActionCard, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
+          <View style={[styles.quickActionIconWrapper, { backgroundColor: isDark ? '#1e293b' : '#eff6ff' }]}>
+            <Icon name="clipboard" size={20} color="#2563eb" />
           </View>
-          <Text style={styles.quickActionTitle}>Twoje ćwiczenia</Text>
+          <Text style={[styles.quickActionTitle, { color: colors.foreground }]}>Twoje ćwiczenia</Text>
           <View style={styles.quickActionFooter}>
-            <Text style={styles.quickActionSubtitle}>Własna baza</Text>
-            <Icon name="chevron-right" size={12} color={Colors.mutedForeground} />
+            <Text style={[styles.quickActionSubtitle, { color: colors.mutedForeground }]}>Własna baza</Text>
+            <Icon name="chevron-right" size={12} color={colors.mutedForeground} />
           </View>
         </Pressable>
       </View>
 
-      <Text style={styles.sectionTitle}>Osiągnięcia</Text>
+      <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Osiągnięcia</Text>
       <View style={styles.achievementsContainer}>
         {achievements.map((ach, i) => (
-          <View key={i} style={[styles.achievementCard, ach.unlocked ? styles.achievementUnlocked : styles.achievementLocked]}>
-            <View style={[styles.achievementIconWrapper, ach.unlocked ? styles.iconUnlocked : styles.iconLocked]}>
-              <Icon name="award" size={24} color={ach.unlocked ? '#fff' : Colors.mutedForeground} />
+          <View key={i} style={[styles.achievementCard, ach.unlocked ? styles.achievementUnlocked : [styles.achievementLocked, { backgroundColor: colors.secondary, borderColor: colors.border }]]}>
+            <View style={[styles.achievementIconWrapper, ach.unlocked ? styles.iconUnlocked : [styles.iconLocked, { backgroundColor: colors.muted }]]}>
+              <Icon name="award" size={24} color={ach.unlocked ? '#fff' : colors.mutedForeground} />
             </View>
-            <Text style={[styles.achievementTitle, ach.unlocked ? styles.textUnlocked : styles.textLocked]}>{ach.name}</Text>
-            <Text style={[styles.achievementDesc, ach.unlocked ? styles.descUnlocked : styles.descLocked]}>{ach.description}</Text>
+            <Text style={[styles.achievementTitle, { color: ach.unlocked ? '#fff' : colors.foreground }]}>{ach.name}</Text>
+            <Text style={[styles.achievementDesc, { color: ach.unlocked ? 'rgba(255,255,255,0.9)' : colors.mutedForeground }]}>{ach.description}</Text>
           </View>
         ))}
       </View>
-      <Pressable style={styles.moreButton}>
-        <Text style={styles.moreButtonText}>Zobacz więcej osiągnięć</Text>
-      </Pressable>
 
       <Pressable style={styles.logoutButton} onPress={logout}>
         <Icon name="log-out" size={20} color="#fff" />
         <Text style={styles.logoutButtonText}>Wyloguj się</Text>
       </Pressable>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
+                <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+                  <Text style={[styles.modalTitle, { color: colors.foreground }]}>Zmień zdjęcie profilowe</Text>
+                </View>
+                
+                <Pressable style={styles.modalOption} onPress={openCamera}>
+                  <View style={[styles.optionIcon, { backgroundColor: '#eff6ff' }]}>
+                    <Icon name="camera" size={20} color="#2563eb" />
+                  </View>
+                  <Text style={[styles.optionText, { color: colors.foreground }]}>Zrób zdjęcie</Text>
+                </Pressable>
+
+                <Pressable style={styles.modalOption} onPress={openGallery}>
+                  <View style={[styles.optionIcon, { backgroundColor: '#f0fdf4' }]}>
+                    <Icon name="image" size={20} color="#22c55e" />
+                  </View>
+                  <Text style={[styles.optionText, { color: colors.foreground }]}>Wybierz z galerii</Text>
+                </Pressable>
+
+                <Pressable style={[styles.modalOption, styles.cancelOption]} onPress={() => setModalVisible(false)}>
+                  <Text style={styles.cancelText}>Anuluj</Text>
+                </Pressable>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   scrollContent: { padding: Spacing.md, paddingBottom: Spacing.xl },
   profileHeader: { alignItems: 'center', marginVertical: Spacing.lg },
-  profileImage: { width: 96, height: 96, borderRadius: 48, borderWidth: 4, borderColor: '#2563eb', marginBottom: Spacing.md },
-  userName: { fontSize: 20, fontWeight: '600', color: Colors.foreground },
-  userEmail: { fontSize: 14, color: Colors.mutedForeground, marginTop: 4 },
+  imageContainer: { position: 'relative' },
+  profileImage: { width: 100, height: 100, borderRadius: 50, borderWidth: 3 },
+  editImageBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#2563eb', width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: '#fff' },
+  userName: { fontSize: 22, fontWeight: '700', marginTop: Spacing.md },
+  userEmail: { fontSize: 14, marginTop: 4 },
   statsContainer: { marginBottom: Spacing.lg },
-  statCard: { backgroundColor: Colors.secondary, padding: Spacing.md, borderRadius: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
-  statLabel: { fontSize: 14, color: Colors.mutedForeground, marginBottom: 6 },
-  statValue: { fontSize: 28, fontWeight: '600', color: Colors.foreground },
-  statIconWrapper: { width: 56, height: 56, backgroundColor: '#eff6ff', borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: Spacing.md, color: Colors.foreground },
-  postsContainer: { marginBottom: Spacing.lg },
-  postCard: { backgroundColor: Colors.secondary, padding: Spacing.md, borderRadius: 16, marginBottom: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
-  postHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.sm },
-  postTitle: { fontSize: 14, fontWeight: '500', color: Colors.foreground },
-  postDate: { fontSize: 12, color: Colors.mutedForeground },
-  postActions: { flexDirection: 'row' },
-  actionItem: { flexDirection: 'row', alignItems: 'center', marginRight: Spacing.md },
-  actionText: { fontSize: 12, color: Colors.mutedForeground, marginLeft: 6 },
+  statCard: { padding: Spacing.md, borderRadius: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm, borderWidth: 1 },
+  statLabel: { fontSize: 13, marginBottom: 4 },
+  statValue: { fontSize: 24, fontWeight: '700' },
+  statIconWrapper: { width: 52, height: 52, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: Spacing.md },
   quickActionsContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.lg },
-  quickActionCard: { flex: 1, backgroundColor: Colors.secondary, padding: Spacing.md, borderRadius: 16, borderWidth: 1, borderColor: Colors.border, marginHorizontal: Spacing.xs },
-  quickActionIconWrapper: { width: 40, height: 40, backgroundColor: '#eff6ff', borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
-  quickActionTitle: { fontSize: 14, fontWeight: '500', color: Colors.foreground, marginBottom: 4 },
+  quickActionCard: { flex: 1, padding: Spacing.md, borderRadius: 16, borderWidth: 1, marginHorizontal: Spacing.xs },
+  quickActionIconWrapper: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
+  quickActionTitle: { fontSize: 14, fontWeight: '600', marginBottom: 4 },
   quickActionFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  quickActionSubtitle: { fontSize: 12, color: Colors.mutedForeground },
-  achievementsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: Spacing.sm },
+  quickActionSubtitle: { fontSize: 12 },
+  achievementsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: Spacing.md },
   achievementCard: { width: '48%', padding: Spacing.md, borderRadius: 16, marginBottom: Spacing.sm },
   achievementUnlocked: { backgroundColor: '#3b82f6' },
-  achievementLocked: { backgroundColor: Colors.secondary, borderWidth: 1, borderColor: Colors.border },
-  achievementIconWrapper: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
+  achievementLocked: { borderWidth: 1 },
+  achievementIconWrapper: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
   iconUnlocked: { backgroundColor: 'rgba(255,255,255,0.2)' },
-  iconLocked: { backgroundColor: Colors.muted },
-  achievementTitle: { fontSize: 14, fontWeight: '600', marginBottom: 4 },
-  textUnlocked: { color: '#fff' },
-  textLocked: { color: Colors.foreground },
+  iconLocked: { },
+  achievementTitle: { fontSize: 14, fontWeight: '700', marginBottom: 4 },
   achievementDesc: { fontSize: 12 },
-  descUnlocked: { color: 'rgba(255,255,255,0.9)' },
-  descLocked: { color: Colors.mutedForeground },
-  moreButton: { height: 48, backgroundColor: Colors.secondary, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Colors.border, marginBottom: Spacing.lg },
-  moreButtonText: { fontSize: 14, fontWeight: '500', color: Colors.foreground },
-  logoutButton: { height: 48, backgroundColor: Colors.destructive, borderRadius: 12, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' },
-  logoutButtonText: { fontSize: 16, fontWeight: '500', color: '#fff', marginLeft: 8 },
+  logoutButton: { height: 52, backgroundColor: '#ef4444', borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: Spacing.md },
+  logoutButtonText: { fontSize: 16, fontWeight: '700', color: '#fff', marginLeft: 10 },
+  
+  // Modal styles
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalContent: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.lg, paddingBottom: 40 },
+  modalHeader: { paddingBottom: Spacing.md, marginBottom: Spacing.md, borderBottomWidth: 1 },
+  modalTitle: { fontSize: 18, fontWeight: '700', textAlign: 'center' },
+  modalOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md },
+  optionIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
+  optionText: { fontSize: 16, fontWeight: '500' },
+  cancelOption: { justifyContent: 'center', marginTop: Spacing.sm },
+  cancelText: { fontSize: 16, color: '#ef4444', fontWeight: '600' },
 });

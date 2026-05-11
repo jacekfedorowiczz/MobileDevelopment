@@ -20,7 +20,7 @@ namespace MobileDevelopment.API.Services.Services.Background
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Odkurzacz Refresh Tokenów został uruchomiony.");
+            _logger.LogInformation("Cleanup Refresh Tokenów został uruchomiony.");
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -30,7 +30,6 @@ namespace MobileDevelopment.API.Services.Services.Background
                     var context = scope.ServiceProvider.GetRequiredService<SystemContext>();
 
                     // Usuwamy tokeny, które wygasły lub zostały unieważnione 1 dzień temu
-
                     var expiredDate = DateTime.UtcNow;
                     var revokedThreshold = DateTime.UtcNow.AddDays(-1);
 

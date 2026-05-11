@@ -1,8 +1,8 @@
 // src/theme/theme.ts
-// Theme constants extracted from default_shadcn_theme.css
-export const Colors = {
+
+export const LightColors = {
   background: "#ffffff",
-  foreground: "#24292f", // approximated from --foreground
+  foreground: "#24292f",
   card: "#ffffff",
   cardForeground: "#24292f",
   popover: "#ffffff",
@@ -21,7 +21,29 @@ export const Colors = {
   input: "transparent",
   inputBackground: "#f3f3f5",
   switchBackground: "#cbced4",
-  radius: 10, // approximate 0.625rem
+};
+
+export const DarkColors = {
+  background: "#030213",
+  foreground: "#f3f3f5",
+  card: "#0a0a0b",
+  cardForeground: "#f3f3f5",
+  popover: "#0a0a0b",
+  popoverForeground: "#f3f3f5",
+  primary: "#ffffff",
+  primaryForeground: "#030213",
+  secondary: "#1a1a1c",
+  secondaryForeground: "#ffffff",
+  muted: "#1a1a1c",
+  mutedForeground: "#a1a1aa",
+  accent: "#1a1a1c",
+  accentForeground: "#ffffff",
+  destructive: "#7f1d1d",
+  destructiveForeground: "#ffffff",
+  border: "rgba(255,255,255,0.1)",
+  input: "transparent",
+  inputBackground: "#1a1a1c",
+  switchBackground: "#3f3f46",
 };
 
 export const Font = {
@@ -38,3 +60,5 @@ export const Spacing = {
   lg: 24,
   xl: 32,
 };
+
+export const Colors = LightColors;
