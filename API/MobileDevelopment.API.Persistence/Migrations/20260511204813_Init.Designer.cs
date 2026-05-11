@@ -12,7 +12,7 @@ using MobileDevelopment.API.Persistence.Context;
 namespace MobileDevelopment.API.Persistence.Migrations
 {
     [DbContext(typeof(SystemContext))]
-    [Migration("20260508144435_Init")]
+    [Migration("20260511204813_Init")]
     partial class Init
     {
         /// <inheritdoc />

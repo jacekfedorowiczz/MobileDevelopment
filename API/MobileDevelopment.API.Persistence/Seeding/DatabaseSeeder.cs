@@ -16,8 +16,7 @@ namespace MobileDevelopment.API.Persistence.Seeding
             SeedMuscleGroups(systemContext);
             SeedExercises(systemContext);
             SeedTags(systemContext);
-            SeedUsers(systemContext, hasher);
-            SeedProfiles(systemContext);
+            SeedUsersAndProfiles(systemContext, hasher);
             SeedWorkoutSessions(systemContext);
             SeedWorkoutSets(systemContext);
             SeedPosts(systemContext);
@@ -35,8 +34,7 @@ namespace MobileDevelopment.API.Persistence.Seeding
             await SeedMuscleGroupsAsync(systemContext, ct);
             await SeedExercisesAsync(systemContext, ct);
             await SeedTagsAsync(systemContext, ct);
-            await SeedUsersAsync(systemContext, hasher, ct);
-            await SeedProfilesAsync(systemContext, ct);
+            await SeedUsersAndProfilesAsync(systemContext, hasher, ct);
             await SeedWorkoutSessionsAsync(systemContext, ct);
             await SeedWorkoutSetsAsync(systemContext, ct);
             await SeedPostsAsync(systemContext, ct);
@@ -135,24 +133,24 @@ namespace MobileDevelopment.API.Persistence.Seeding
         }
 
         // ──────────────────────────────────────────────
-        // Users
+        // Users & Profiles
         // ──────────────────────────────────────────────
 
-        private static void SeedUsers(SystemContext ctx, IPasswordHasher<User> hasher)
+        private static void SeedUsersAndProfiles(SystemContext ctx, IPasswordHasher<User> hasher)
         {
-            if (ctx.Users.Any()) return;
-            ctx.Users.AddRange(BuildUsers(hasher));
+            if (ctx.Users.Any() || ctx.Profiles.Any()) return;
+            ctx.Users.AddRange(BuildUsersAndProfiles(hasher));
             ctx.SaveChanges();
         }
 
-        private static async Task SeedUsersAsync(SystemContext ctx, IPasswordHasher<User> hasher, CancellationToken ct)
+        private static async Task SeedUsersAndProfilesAsync(SystemContext ctx, IPasswordHasher<User> hasher, CancellationToken ct)
         {
-            if (await ctx.Users.AnyAsync(ct)) return;
-            ctx.Users.AddRange(BuildUsers(hasher));
+            if (await ctx.Users.AnyAsync(ct) || await ctx.Profiles.AnyAsync(ct)) return;
+            ctx.Users.AddRange(BuildUsersAndProfiles(hasher));
             await ctx.SaveChangesAsync(ct);
         }
 
-        private static IEnumerable<User> BuildUsers(IPasswordHasher<User> hasher)
+        private static IEnumerable<User> BuildUsersAndProfiles(IPasswordHasher<User> hasher)
         {
             var rawUsers = new[]
             {
@@ -170,8 +168,21 @@ namespace MobileDevelopment.API.Persistence.Seeding
                 new { Login = "rpawlak",     First = "Robert",   Last = "Pawlak",    Email = "r.pawlak@mail.com",        Phone = "+48100000012", Role = Role.User,          Password = "Test@1234" },
             };
 
-            return rawUsers.Select(u =>
+            var goals = Enum.GetValues<FitnessGoal>();
+            var units = Enum.GetValues<WeightUnits>();
+
+            return rawUsers.Select((u, i) =>
             {
+                var profile = new Profile
+                {
+                    Age = 20 + (i * 3 % 30),
+                    Weight = 60m + i * 4,
+                    Height = 160m + i * 2,
+                    PreferredWeightUnit = units[i % units.Length],
+                    IsDarkModeEnabled = i % 2 == 0,
+                    CurrentGoal = goals[i % goals.Length],
+                };
+
                 var user = new User
                 {
                     Login = u.Login,
@@ -182,47 +193,12 @@ namespace MobileDevelopment.API.Persistence.Seeding
                     Role = u.Role,
                     CreatedAt = DateTime.UtcNow,
                     PasswordHash = string.Empty,
-                    DateOfBirth = new DateOnly(1996,02,29)
+                    DateOfBirth = new DateOnly(1996, 02, 29),
+                    Profile = profile
                 };
+
                 user.PasswordHash = hasher.HashPassword(user, u.Password);
                 return user;
-            });
-        }
-
-        // ──────────────────────────────────────────────
-        // Profiles
-        // ──────────────────────────────────────────────
-
-        private static void SeedProfiles(SystemContext ctx)
-        {
-            if (ctx.Profiles.Any()) return;
-            ctx.Profiles.AddRange(BuildProfiles(ctx));
-            ctx.SaveChanges();
-        }
-
-        private static async Task SeedProfilesAsync(SystemContext ctx, CancellationToken ct)
-        {
-            if (await ctx.Profiles.AnyAsync(ct)) return;
-            ctx.Profiles.AddRange(BuildProfiles(ctx));
-            await ctx.SaveChangesAsync(ct);
-        }
-
-        private static IEnumerable<Profile> BuildProfiles(SystemContext ctx)
-        {
-            var users = ctx.Users.ToList();
-            var goals = Enum.GetValues<FitnessGoal>();
-            var units = Enum.GetValues<WeightUnits>();
-            var rng   = new Random(42);
-
-            return users.Select((u, i) => new Profile
-            {
-                UserId               = u.Id,
-                Age                  = 20 + (i * 3 % 30),
-                Weight               = 60m + i * 4,
-                Height               = 160m + i * 2,
-                PreferredWeightUnit  = units[i % units.Length],
-                IsDarkModeEnabled    = i % 2 == 0,
-                CurrentGoal          = goals[i % goals.Length],
             });
         }
 
@@ -256,11 +232,11 @@ namespace MobileDevelopment.API.Persistence.Seeding
                     var start = DateTime.UtcNow.AddDays(-(i * 3 + j));
                     list.Add(new WorkoutSession
                     {
-                        UserId           = users[i].Id,
-                        Name             = sessionNames[(i + j) % sessionNames.Length],
-                        Description      = $"Training session #{j + 1}",
-                        StartTime        = start,
-                        EndTime          = start.AddHours(1.5),
+                        UserId = users[i].Id,
+                        Name = sessionNames[(i + j) % sessionNames.Length],
+                        Description = $"Training session #{j + 1}",
+                        StartTime = start,
+                        EndTime = start.AddHours(1.5),
                         GlobalSessionRpe = 6 + (j % 4),
                     });
                 }
@@ -288,7 +264,7 @@ namespace MobileDevelopment.API.Persistence.Seeding
 
         private static IEnumerable<WorkoutSet> BuildWorkoutSets(SystemContext ctx)
         {
-            var sessions  = ctx.WorkoutSessions.ToList();
+            var sessions = ctx.WorkoutSessions.ToList();
             var exercises = ctx.Exercises.ToList();
             var list = new List<WorkoutSet>();
             foreach (var (session, si) in sessions.Select((s, i) => (s, i)))
@@ -298,11 +274,11 @@ namespace MobileDevelopment.API.Persistence.Seeding
                     list.Add(new WorkoutSet
                     {
                         WorkoutSessionId = session.Id,
-                        ExerciseId       = exercises[(si + setNum) % exercises.Count].Id,
-                        SetNumber        = setNum,
-                        Weight           = 60m + si * 5 + setNum * 2.5m,
-                        Reps             = 8 + setNum,
-                        Rpe              = 7 + (setNum % 3),
+                        ExerciseId = exercises[(si + setNum) % exercises.Count].Id,
+                        SetNumber = setNum,
+                        Weight = 60m + si * 5 + setNum * 2.5m,
+                        Reps = 8 + setNum,
+                        Rpe = 7 + (setNum % 3),
                     });
                 }
             }
@@ -345,10 +321,10 @@ namespace MobileDevelopment.API.Persistence.Seeding
             return users.SelectMany((u, ui) =>
                 Enumerable.Range(0, 2).Select(pi => new Post
                 {
-                    UserId     = u.Id,
-                    Title      = titles[(ui * 2 + pi) % titles.Length],
-                    Content    = $"This is a detailed post about {titles[(ui * 2 + pi) % titles.Length].ToLower()}. Sharing my experience and insights with the community.",
-                    CreatedAt  = DateTime.UtcNow.AddDays(-(ui + pi * 2)),
+                    UserId = u.Id,
+                    Title = titles[(ui * 2 + pi) % titles.Length],
+                    Content = $"This is a detailed post about {titles[(ui * 2 + pi) % titles.Length].ToLower()}. Sharing my experience and insights with the community.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-(ui + pi * 2)),
                     TargetGoal = goals[(ui + pi) % goals.Length],
                 }));
         }
@@ -392,9 +368,9 @@ namespace MobileDevelopment.API.Persistence.Seeding
                 {
                     list.Add(new Comment
                     {
-                        PostId    = posts[pi].Id,
-                        UserId    = users[(pi + ci + 1) % users.Count].Id,
-                        Content   = contents[(pi * 2 + ci) % contents.Length],
+                        PostId = posts[pi].Id,
+                        UserId = users[(pi + ci + 1) % users.Count].Id,
+                        Content = contents[(pi * 2 + ci) % contents.Length],
                         CreatedAt = DateTime.UtcNow.AddHours(-(pi + ci)),
                     });
                 }
@@ -424,8 +400,8 @@ namespace MobileDevelopment.API.Persistence.Seeding
         {
             var posts = ctx.Posts.ToList();
             var users = ctx.Users.ToList();
-            var seen  = new HashSet<(int, int)>();
-            var list  = new List<PostLike>();
+            var seen = new HashSet<(int, int)>();
+            var list = new List<PostLike>();
 
             for (int pi = 0; pi < posts.Count; pi++)
             {
@@ -437,8 +413,8 @@ namespace MobileDevelopment.API.Persistence.Seeding
 
                     list.Add(new PostLike
                     {
-                        PostId    = postId,
-                        UserId    = userId,
+                        PostId = postId,
+                        UserId = userId,
                         CreatedAt = DateTime.UtcNow.AddMinutes(-(pi * 10 + ui)),
                     });
                 }
@@ -472,11 +448,11 @@ namespace MobileDevelopment.API.Persistence.Seeding
             return users.SelectMany((u, ui) =>
                 Enumerable.Range(0, 2).Select(di => new Diet
                 {
-                    UserId      = u.Id,
-                    Name        = dietNames[(ui * 2 + di) % dietNames.Length],
+                    UserId = u.Id,
+                    Name = dietNames[(ui * 2 + di) % dietNames.Length],
                     Description = $"A structured eating plan focused on {dietNames[(ui * 2 + di) % dietNames.Length].ToLower()}.",
-                    StartDate   = DateTime.UtcNow.AddMonths(-(ui + di + 1)),
-                    EndDate     = di == 0 ? null : DateTime.UtcNow.AddMonths(3),
+                    StartDate = DateTime.UtcNow.AddMonths(-(ui + di + 1)),
+                    EndDate = di == 0 ? null : DateTime.UtcNow.AddMonths(3),
                 }));
         }
 
@@ -501,7 +477,7 @@ namespace MobileDevelopment.API.Persistence.Seeding
         private static IEnumerable<DietDay> BuildDietDays(SystemContext ctx)
         {
             var diets = ctx.Diets.ToList();
-            var list  = new List<DietDay>();
+            var list = new List<DietDay>();
             foreach (var (diet, di) in diets.Select((d, i) => (d, i)))
             {
                 for (int dayOff = 0; dayOff < 7; dayOff++)
@@ -509,8 +485,8 @@ namespace MobileDevelopment.API.Persistence.Seeding
                     list.Add(new DietDay
                     {
                         DietId = diet.Id,
-                        Date   = diet.StartDate.AddDays(dayOff),
-                        Notes  = dayOff == 0 ? "First day – stay consistent!" : null,
+                        Date = diet.StartDate.AddDays(dayOff),
+                        Notes = dayOff == 0 ? "First day – stay consistent!" : null,
                     });
                 }
             }
@@ -547,13 +523,13 @@ namespace MobileDevelopment.API.Persistence.Seeding
                 {
                     list.Add(new Meal
                     {
-                        DietDayId      = day.Id,
-                        Name           = mealNames[(di + mi) % mealNames.Length],
-                        Time           = TimeSpan.FromHours(7 + mi * 4),
-                        TotalCalories  = 400m + mi * 150 + di * 10,
-                        Protein        = 30m  + mi * 5,
-                        Carbs          = 50m  + mi * 10,
-                        Fats           = 15m  + mi * 3,
+                        DietDayId = day.Id,
+                        Name = mealNames[(di + mi) % mealNames.Length],
+                        Time = TimeSpan.FromHours(7 + mi * 4),
+                        TotalCalories = 400m + mi * 150 + di * 10,
+                        Protein = 30m + mi * 5,
+                        Carbs = 50m + mi * 10,
+                        Fats = 15m + mi * 3,
                     });
                 }
             }

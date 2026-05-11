@@ -1,16 +1,18 @@
 import { Platform } from 'react-native';
 
 const getBaseUrl = (): string => {
+    const API_VERSION = 'v1';
+    const PLATFORM_PATH = 'mobile';
+
     if (__DEV__) {
-        // DOCKER: Użyj lokalnego IP (nie localhost!)
         if (Platform.OS === 'android') {
-            return 'http://10.1.15.17:5000/api'; // TWOJE IP!
+            return `http://192.168.0.10:8080/api/${API_VERSION}/${PLATFORM_PATH}`;
         } else if (Platform.OS === 'ios') {
-            return 'http://10.1.15.17:5000/api';  // TWOJE IP!
+            return `http://localhost:8080/api/${API_VERSION}/${PLATFORM_PATH}`;
         }
     }
 
-    return 'https://your-production-api.com/api';
+    return `https://your-production-api.com/api/${API_VERSION}/${PLATFORM_PATH}`;
 };
 
 export const API_BASE_URL = getBaseUrl();

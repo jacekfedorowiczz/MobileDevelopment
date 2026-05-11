@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import { View, Text } from 'react-native';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/useAuthStore';
 
 import DashboardScreen from '../screens/DashboardScreen';
 import TrainingScreen from '../screens/TrainingScreen';
@@ -85,13 +85,7 @@ function AuthStack() {
 }
 
 export default function AppNavigator() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#fff' }} />
-    );
-  }
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

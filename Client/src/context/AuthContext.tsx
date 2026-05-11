@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   logout: () => void;
-  login: (token: string) => void;
+  login: (token: string, refreshToken: string) => void;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -21,7 +21,6 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
     const checkAuth = async () => {
       try {
         const token = await AsyncStorage.getItem('userToken');
@@ -37,9 +36,10 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     checkAuth();
   }, []);
 
-  const login = async (token: string) => {
+  const login = async (token: string, refreshToken: string) => {
     try {
       await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
       setIsAuthenticated(true);
     } catch (e) {
       console.error(e);
@@ -48,12 +48,13 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.multiRemove(['userToken', 'refreshToken']);
       setIsAuthenticated(false);
     } catch (e) {
       console.error(e);
     }
   };
+
 
   return (
     <AuthContext.Provider value={{ logout, login, isAuthenticated, isLoading }}>

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using MobileDevelopment.API.Domain.Interfaces.Auth;
 using MobileDevelopment.API.Services.Analytics;
 using MobileDevelopment.API.Services.Calculators;
 using MobileDevelopment.API.Services.Interfaces;
@@ -6,6 +7,7 @@ using MobileDevelopment.API.Services.Services;
 using MobileDevelopment.API.Services.Services.Background;
 using MobileDevelopment.API.Services.Services.Calculators;
 using MobileDevelopment.API.Services.Services.Facades;
+using MobileDevelopment.API.Services.Services.UserContext;
 
 namespace MobileDevelopment.API.Services.Extensions
 {
@@ -14,6 +16,8 @@ namespace MobileDevelopment.API.Services.Extensions
         public static IServiceCollection RegisterServices(this IServiceCollection services)
         {
             services.AddHttpContextAccessor();
+            services.AddScoped<IUserContext, UserContext>();
+            services.AddScoped<ITokenService, TokenService>();
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IProfileService, ProfileService>();
