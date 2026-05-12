@@ -8,7 +8,8 @@ namespace MobileDevelopment.API.Models.DTO.Meals
         decimal TotalCalories,
         decimal Protein,
         decimal Carbs,
-        decimal Fats
+        decimal Fats,
+        MobileDevelopment.API.Models.DTO.DietDays.DietDayDto? DietDay = null
     );
 
     public sealed record CreateEditMealDto(

@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using MobileDevelopment.API.Domain.Entities;
+using MobileDevelopment.API.Domain.Enums;
+using MobileDevelopment.API.Domain.Extensions;
 using MobileDevelopment.API.Models.DTO.Users;
 using MobileDevelopment.API.Models.Extensions;
 using MobileDevelopment.API.Models.Wrappers;
 using MobileDevelopment.API.Persistence.Interfaces;
-using MobileDevelopment.API.Services.Commands.User.LoginCommand;
-using MobileDevelopment.API.Services.Commands.User.RegisterCommand;
+using MobileDevelopment.API.Services.Commands.User;
 using MobileDevelopment.API.Services.Interfaces;
+using MobileDevelopment.API.Services.Mapping;
 
 namespace MobileDevelopment.API.Services.Services
 {
@@ -14,26 +17,13 @@ namespace MobileDevelopment.API.Services.Services
     {
         private readonly IUserRepository _repo;
         private readonly IPasswordHasher<User> _passwordHasher;
-        private readonly IBaseEntityRepository<RefreshToken> _refreshTokenRepository;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(IUserRepository repo, IPasswordHasher<User> passwordHasher, IBaseEntityRepository<RefreshToken> refreshTokenRepository)
+        public UserService(IUserRepository repo, IPasswordHasher<User> passwordHasher, ILogger<UserService> logger)
         {
             _repo = repo;
             _passwordHasher = passwordHasher;
-            _refreshTokenRepository = refreshTokenRepository;
-        }
-
-        public async Task AddRefreshToken(int userId, string refreshToken, CancellationToken cancellationToken = default)
-        {
-            var refreshTokenEntity = new RefreshToken
-            {
-                Token = refreshToken!,
-                UserId = userId,
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _refreshTokenRepository.CreateAsync(refreshTokenEntity, cancellationToken);
+            _logger = logger;
         }
 
         public async Task<Result<UserDto>> GetByIdAsync(int id, CancellationToken token = default)
@@ -51,7 +41,7 @@ namespace MobileDevelopment.API.Services.Services
         {
             ArgumentNullException.ThrowIfNull(loginCmd);
 
-            var user = await _repo.GetByEmailAsync(loginCmd.Email);
+            var user = await _repo.GetByEmailAsync(loginCmd.Email, cancellationToken);
             if (user is null)
             {
                 return Result<User>.Failure("Nieprawidłowy adres e-mail lub hasło.");
@@ -77,19 +67,32 @@ namespace MobileDevelopment.API.Services.Services
             var user = new User
             {
                 Email = cmd.Email,
-                Login = cmd.Email, // Używamy email jako login
+                Login = cmd.Email,
                 FirstName = cmd.FirstName,
                 LastName = cmd.LastName,
                 MobilePhone = cmd.MobilePhone,
                 DateOfBirth = cmd.DateOfBirth,
                 CreatedAt = DateTime.UtcNow,
-                PasswordHash = string.Empty // Zostanie ustawione za chwilę
+                PasswordHash = string.Empty,
+                Profile = new Profile
+                {
+                    Age = cmd.DateOfBirth.CalculateAge(),
+                    Weight = 0M,
+                    Height = 0M,
+                    PreferredWeightUnit = WeightUnits.Kilos,
+                    CurrentGoal = FitnessGoal.Maintain
+                }
             };
 
             user.PasswordHash = _passwordHasher.HashPassword(user, cmd.Password);
+            var entity = await _repo.CreateAsync(user, token);
+            return Result<User>.Success(entity);
+        }
 
-            await _repo.CreateAsync(user, token);
-            return Result<User>.Success(user);
+        public async Task<Result<bool>> RemoveUserAsync(int id, CancellationToken token = default)
+        {
+            var result = await _repo.DeleteAsync(id, token);
+            return result ? Result<bool>.Success(true) : Result<bool>.Failure("Nie udało się usunąć użytkownika");
         }
     }
 }

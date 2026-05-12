@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from './api-config';
+import { useAuthStore } from '../store/useAuthStore';
 
 export class BaseApiService {
     private static isRefreshing = false;
@@ -20,7 +21,7 @@ export class BaseApiService {
             'Accept': 'application/json',
         };
 
-        const token = await AsyncStorage.getItem('userToken');
+        const token = useAuthStore.getState().userToken;
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
@@ -73,9 +74,7 @@ export class BaseApiService {
                 return retryResponse.json();
             } catch (error) {
                 // Jeśli odświeżanie się nie uda, wyloguj użytkownika
-                await AsyncStorage.multiRemove(['userToken', 'refreshToken']);
-                // Tu można by wywołać jakąś globalną akcję wylogowania, ale na poziomie serwisu
-                // najbezpieczniej wyrzucić błąd, który obsłuży UI.
+                useAuthStore.getState().logout();
                 throw new Error("Sesja wygasła. Zaloguj się ponownie.");
             }
         }
@@ -94,14 +93,14 @@ export class BaseApiService {
 
         this.isRefreshing = true;
 
-        const refreshToken = await AsyncStorage.getItem('refreshToken');
+        const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) {
             this.isRefreshing = false;
             throw new Error("Brak refresh tokena.");
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+            const response = await fetch(`${API_BASE_URL}/user/refresh`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ refreshToken })
@@ -110,11 +109,15 @@ export class BaseApiService {
             if (!response.ok) throw new Error("Failed to refresh token");
 
             const result = await response.json();
-            const newToken = result.data.token;
-            const newRefreshToken = result.data.refreshToken;
+            
+            if (!result.isSuccess || !result.value) {
+                throw new Error(result.errorMessage || "Failed to refresh token");
+            }
 
-            await AsyncStorage.setItem('userToken', newToken);
-            await AsyncStorage.setItem('refreshToken', newRefreshToken);
+            const newToken = result.value.accessToken;
+            const newRefreshToken = result.value.refreshToken;
+
+            useAuthStore.getState().setAuth(newToken, newRefreshToken);
 
             this.onTokenRefreshed(newToken);
             return newToken;

@@ -1,4 +1,4 @@
-﻿namespace MobileDevelopment.API.Middlewares
+namespace MobileDevelopment.API.Middlewares
 {
     public sealed class ErrorHandlingMiddleware : IMiddleware
     {
@@ -15,9 +15,8 @@
             {
                 await next.Invoke(context);
             }
-            catch (BadHttpRequestException badRequestEx)
+            catch (BadHttpRequestException)
             {
-
                 throw;
             }
             catch (Exception e)

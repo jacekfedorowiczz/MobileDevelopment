@@ -154,8 +154,8 @@ namespace MobileDevelopment.API.Persistence.Seeding
         {
             var rawUsers = new[]
             {
-                new { Login = "admin",       First = "Admin",    Last = "System",    Email = "admin@fittrack.app",       Phone = "+48100000001", Role = Role.Administrator, Password = "Admin@1234" },
-                new { Login = "jkowalski",   First = "Jan",      Last = "Kowalski",  Email = "j.kowalski@mail.com",      Phone = "+48100000002", Role = Role.User,          Password = "Test@1234" },
+                new { Login = "admin",       First = "Admin",    Last = "System",    Email = "admin@fittrack.app",       Phone = "+48100000001", Role = Role.Administrator, Password = "Start123" },
+                new { Login = "jkowalski",   First = "Jan",      Last = "Kowalski",  Email = "j.kowalski@mail.com",      Phone = "+48100000002", Role = Role.User,          Password = "Start123" },
                 new { Login = "anowak",      First = "Anna",     Last = "Nowak",     Email = "a.nowak@mail.com",         Phone = "+48100000003", Role = Role.User,          Password = "Test@1234" },
                 new { Login = "pzielinski",  First = "Piotr",    Last = "Zieliński", Email = "p.zielinski@mail.com",     Phone = "+48100000004", Role = Role.User,          Password = "Test@1234" },
                 new { Login = "mwisniewska", First = "Marta",    Last = "Wiśniewska",Email = "m.wisniewska@mail.com",    Phone = "+48100000005", Role = Role.User,          Password = "Test@1234" },
@@ -179,7 +179,6 @@ namespace MobileDevelopment.API.Persistence.Seeding
                     Weight = 60m + i * 4,
                     Height = 160m + i * 2,
                     PreferredWeightUnit = units[i % units.Length],
-                    IsDarkModeEnabled = i % 2 == 0,
                     CurrentGoal = goals[i % goals.Length],
                 };
 

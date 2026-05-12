@@ -23,8 +23,7 @@ export interface PagedResponse<T> {
 
 export class PostService extends BaseApiService {
     public static async getPostsAsync(pageNumber: number, pageSize: number): Promise<Result<PagedResponse<Post>>> {
-        // Zmień endpoint na /posts lub inny wg. Twojej konfiguracji
-        // Symulacja parametrów: ?pageNumber=1&pageSize=10
-        return this.getAsync<Result<PagedResponse<Post>>>(`/posts?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+        // zmień endpoint
+        return this.getAsync<Result<PagedResponse<Post>>>(`/community/posts?pageNumber=${pageNumber}&pageSize=${pageSize}`);
     }
 }

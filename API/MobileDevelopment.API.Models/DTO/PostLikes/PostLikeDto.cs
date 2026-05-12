@@ -4,7 +4,9 @@ namespace MobileDevelopment.API.Models.DTO.PostLikes
         int Id,
         int PostId,
         int UserId,
-        DateTime CreatedAt
+        DateTime CreatedAt,
+        MobileDevelopment.API.Models.DTO.Posts.PostDto? Post = null,
+        MobileDevelopment.API.Models.DTO.Users.UserDto? User = null
     );
 
     public sealed record CreateEditPostLikeDto(

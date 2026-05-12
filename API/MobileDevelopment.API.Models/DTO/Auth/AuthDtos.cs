@@ -13,6 +13,8 @@
         public string Password { get; init; } = string.Empty;
     }
 
+    public sealed record LogoutRequest(string RefreshToken);
+
     public sealed record RefreshTokenRequest()
     {
         public string RefreshToken { get; init; } = string.Empty;

@@ -53,6 +53,9 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("EditedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("PostId")
                         .HasColumnType("int");
 
@@ -290,6 +293,9 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
+                    b.Property<string>("Avatar")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CurrentGoal")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -298,9 +304,6 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.Property<decimal>("Height")
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
-
-                    b.Property<bool>("IsDarkModeEnabled")
-                        .HasColumnType("bit");
 
                     b.Property<string>("PreferredWeightUnit")
                         .IsRequired()
@@ -315,6 +318,9 @@ namespace MobileDevelopment.API.Persistence.Migrations
                         .HasColumnType("decimal(6,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Profiles");
                 });
@@ -436,9 +442,6 @@ namespace MobileDevelopment.API.Persistence.Migrations
                         .IsUnique();
 
                     b.HasIndex("MobilePhone")
-                        .IsUnique();
-
-                    b.HasIndex("ProfileId")
                         .IsUnique();
 
                     b.ToTable("Users");
@@ -643,6 +646,17 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.Profile", b =>
+                {
+                    b.HasOne("MobileDevelopment.API.Domain.Entities.User", "User")
+                        .WithOne("Profile")
+                        .HasForeignKey("MobileDevelopment.API.Domain.Entities.Profile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("MobileDevelopment.API.Domain.Entities.User", "User")
@@ -652,17 +666,6 @@ namespace MobileDevelopment.API.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.User", b =>
-                {
-                    b.HasOne("MobileDevelopment.API.Domain.Entities.Profile", "Profile")
-                        .WithOne("User")
-                        .HasForeignKey("MobileDevelopment.API.Domain.Entities.User", "ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.WorkoutSession", b =>
@@ -747,14 +750,10 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.Navigation("Likes");
                 });
 
-            modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.Profile", b =>
-                {
-                    b.Navigation("User")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.User", b =>
                 {
+                    b.Navigation("Profile");
+
                     b.Navigation("Sessions");
                 });
 

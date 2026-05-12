@@ -11,6 +11,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__MsSqlDb=Server=db;Database=MobileDevelopmentDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True;MultipleActiveResultSets=true
       - Jwt__SecretKey=CHANGE-ME-TO-A-SECURE-KEY-AT-LEAST-32-CHARS-LONG!!
+      - Jwt__Issuer=FitTrackerAPI
+      - Jwt__Audience=FitTrackerMobileClient
+      - Jwt__AccessTokenExpirationMinutes=10
+      - Jwt__RefreshTokenExpirationDays=7
     depends_on:
       - db
 

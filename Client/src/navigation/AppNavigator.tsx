@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import { View, Text } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
+import { useTheme } from '../context/ThemeContext';
 
 import DashboardScreen from '../screens/DashboardScreen';
 import TrainingScreen from '../screens/TrainingScreen';
@@ -46,6 +47,7 @@ function TrainingStack() {
 }
 
 function MainTabs() {
+  const { colors, isDark } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -58,19 +60,19 @@ function MainTabs() {
           else if (route.name === 'Profile') iconName = 'user';
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#030213',
-        tabBarInactiveTintColor: '#717182',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.mutedForeground,
         tabBarStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: colors.background,
           borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
+          borderTopColor: colors.border,
         },
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
-      <Tab.Screen name="Training" component={TrainingStack} />
-      <Tab.Screen name="Community" component={CommunityScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ tabBarLabel: 'Pulpit' }} />
+      <Tab.Screen name="Training" component={TrainingStack} options={{ tabBarLabel: 'Trening' }} />
+      <Tab.Screen name="Community" component={CommunityScreen} options={{ tabBarLabel: 'Społeczność' }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Profil' }} />
     </Tab.Navigator>
   );
 }

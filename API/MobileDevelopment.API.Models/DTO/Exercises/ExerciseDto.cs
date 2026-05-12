@@ -4,7 +4,9 @@ namespace MobileDevelopment.API.Models.DTO.Exercises
         int Id,
         string Name,
         string? Description,
-        bool IsCompound
+        bool IsCompound,
+        System.Collections.Generic.ICollection<MobileDevelopment.API.Models.DTO.MuscleGroups.MuscleGroupDto>? TargetedMuscles = null,
+        System.Collections.Generic.ICollection<MobileDevelopment.API.Models.DTO.WorkoutSets.WorkoutSetDto>? Sets = null
     );
 
     public sealed record CreateEditExerciseDto(

@@ -5,7 +5,9 @@ namespace MobileDevelopment.API.Models.DTO.Comments
         int PostId,
         int UserId,
         string Content,
-        DateTime CreatedAt
+        DateTime CreatedAt,
+        MobileDevelopment.API.Models.DTO.Posts.PostDto? Post = null,
+        MobileDevelopment.API.Models.DTO.Users.UserDto? User = null
     );
 
     public sealed record CreateEditCommentDto(

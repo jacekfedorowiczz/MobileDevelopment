@@ -52,7 +52,7 @@ namespace MobileDevelopment.API.Persistence.Configurations
 
             builder.HasOne(u => u.Profile)
                 .WithOne(p => p.User)
-                .HasForeignKey<User>(u => u.ProfileId)
+                .HasForeignKey<Profile>(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

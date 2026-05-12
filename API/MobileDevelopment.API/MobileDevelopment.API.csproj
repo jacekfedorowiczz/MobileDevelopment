@@ -42,9 +42,4 @@
     <ProjectReference Include="..\MobileDevelopment.API.Services\MobileDevelopment.API.Services.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\" />
-    <Folder Include="Validators\" />
-  </ItemGroup>
-
 </Project>

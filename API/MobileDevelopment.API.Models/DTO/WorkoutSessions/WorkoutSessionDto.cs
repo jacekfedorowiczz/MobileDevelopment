@@ -7,7 +7,9 @@ namespace MobileDevelopment.API.Models.DTO.WorkoutSessions
         string? Description,
         DateTime StartTime,
         DateTime? EndTime,
-        int? GlobalSessionRpe
+        int? GlobalSessionRpe,
+        MobileDevelopment.API.Models.DTO.Users.UserDto? User = null,
+        System.Collections.Generic.ICollection<MobileDevelopment.API.Models.DTO.WorkoutSets.WorkoutSetDto>? Sets = null
     );
 
     public sealed record CreateEditWorkoutSessionDto(
