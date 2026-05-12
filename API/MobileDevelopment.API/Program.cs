@@ -13,7 +13,7 @@ using MobileDevelopment.API.Persistence.Context;
 using MobileDevelopment.API.Persistence.Extensions;
 using MobileDevelopment.API.Services.Communication;
 using MobileDevelopment.API.Services.Extensions;
-using MobileDevelopment.API.Services.Queries.User.GetUserQuery;
+using MobileDevelopment.API.Services.Queries.User;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
@@ -49,9 +49,7 @@ namespace MobileDevelopment.API
                 options.DefaultChallengeScheme = Constants.Bearer;
             }).AddJwtBearer(cfg =>
             {
-                #if !DEBUG
-                cfg.RequireHttpsMetadata = true;
-                #endif
+                cfg.RequireHttpsMetadata = false;
                 cfg.SaveToken = true;
                 cfg.TokenValidationParameters = new TokenValidationParameters
                 {

@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using MobileDevelopment.API.Domain.Entities;
 using MobileDevelopment.API.Persistence.Context;
 using MobileDevelopment.API.Persistence.Interfaces;
+using MobileDevelopment.API.Persistence.Interfaces.Base;
 using MobileDevelopment.API.Persistence.Repositories;
+using MobileDevelopment.API.Persistence.Repositories.Base;
 using MobileDevelopment.API.Persistence.Seeding;
 
 namespace MobileDevelopment.API.Persistence.Extensions
@@ -67,6 +69,7 @@ namespace MobileDevelopment.API.Persistence.Extensions
             services.AddScoped<IPostLikeRepository, PostLikeRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<ITagRepository, TagRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
             return services;
         }

@@ -9,6 +9,7 @@ namespace MobileDevelopment.API.Domain.Entities
 
         public required string Content { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? EditedAt { get; set; }
 
         public Post Post { get; set; } = null!;
         public User User { get; set; } = null!;

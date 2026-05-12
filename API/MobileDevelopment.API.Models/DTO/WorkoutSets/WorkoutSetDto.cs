@@ -7,7 +7,9 @@ namespace MobileDevelopment.API.Models.DTO.WorkoutSets
         int SetNumber,
         decimal Weight,
         int Reps,
-        int? Rpe
+        int? Rpe,
+        MobileDevelopment.API.Models.DTO.WorkoutSessions.WorkoutSessionDto? WorkoutSession = null,
+        MobileDevelopment.API.Models.DTO.Exercises.ExerciseDto? Exercise = null
     );
 
     public sealed record CreateEditWorkoutSetDto(

@@ -14,7 +14,9 @@ namespace MobileDevelopment.API.Models.DTO.Users
         DateOnly DateOfBirth,
         int Age,
         Role Role,
-        int ProfileId
+        int ProfileId,
+        MobileDevelopment.API.Models.DTO.Profiles.ProfileDto? Profile = null,
+        System.Collections.Generic.ICollection<MobileDevelopment.API.Models.DTO.WorkoutSessions.WorkoutSessionDto>? Sessions = null
     );
 
     public sealed record CreateEditUserDto(

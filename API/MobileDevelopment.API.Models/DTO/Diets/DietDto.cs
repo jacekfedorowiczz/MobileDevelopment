@@ -7,7 +7,9 @@ namespace MobileDevelopment.API.Models.DTO.Diets
         string? Description,
         DateTime StartDate,
         DateTime? EndDate,
-        bool IsActive
+        bool IsActive,
+        MobileDevelopment.API.Models.DTO.Users.UserDto? User = null,
+        System.Collections.Generic.ICollection<MobileDevelopment.API.Models.DTO.DietDays.DietDayDto>? DietDays = null
     );
 
     public sealed record CreateEditDietDto(

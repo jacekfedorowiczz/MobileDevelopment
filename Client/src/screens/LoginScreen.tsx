@@ -5,6 +5,7 @@ import { Spacing } from '../theme/theme';
 import { useAuthStore } from '../store/useAuthStore';
 import { UserService } from '../api/UserService';
 import { useTheme } from '../context/ThemeContext';
+import Logo from '../components/Logo';
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -46,13 +47,7 @@ export default function LoginScreen({ navigation }: any) {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.content}>
 
-          <View style={styles.logoContainer}>
-            <View style={styles.logoIconWrapper}>
-              <Icon name="activity" size={40} color="#fff" />
-            </View>
-            <Text style={styles.logoText}>FitTracker</Text>
-            <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Śledź swoje postępy na siłowni</Text>
-          </View>
+          <Logo subtitleColor={colors.mutedForeground} />
 
           <View style={styles.formContainer}>
             {errorMessage && (
@@ -114,10 +109,6 @@ export default function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { flex: 1, justifyContent: 'center', paddingHorizontal: Spacing.xl },
-  logoContainer: { alignItems: 'center', marginBottom: Spacing.xl * 1.5 },
-  logoIconWrapper: { width: 80, height: 80, borderRadius: 24, backgroundColor: '#2563eb', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.lg, shadowColor: '#2563eb', shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
-  logoText: { fontSize: 36, fontWeight: 'bold', color: '#3b82f6' },
-  subtitle: { fontSize: 14, marginTop: 8 },
   formContainer: { width: '100%' },
   inputGroup: { marginBottom: Spacing.lg },
   inputLabel: { fontSize: 14, fontWeight: '500', marginBottom: 8 },

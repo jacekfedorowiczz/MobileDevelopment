@@ -2,6 +2,7 @@
 using MobileDevelopment.API.Persistence.Context;
 using MobileDevelopment.API.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MobileDevelopment.API.Persistence.Repositories.Base;
 
 
 namespace MobileDevelopment.API.Persistence.Repositories

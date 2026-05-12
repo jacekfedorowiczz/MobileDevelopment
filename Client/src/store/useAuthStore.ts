@@ -24,7 +24,6 @@ export const useAuthStore = create<AuthState>()(
             }),
 
             logout: () => {
-                AsyncStorage.multiRemove(['userToken', 'refreshToken']);
                 set({
                     userToken: null,
                     refreshToken: null,

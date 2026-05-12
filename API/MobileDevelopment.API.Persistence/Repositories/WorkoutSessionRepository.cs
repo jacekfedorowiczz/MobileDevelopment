@@ -1,64 +1,14 @@
 ﻿using MobileDevelopment.API.Domain.Entities;
-using MobileDevelopment.API.Models.Pagination;
+using MobileDevelopment.API.Persistence.Context;
 using MobileDevelopment.API.Persistence.Interfaces;
+using MobileDevelopment.API.Persistence.Repositories.Base;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    internal sealed class WorkoutSessionRepository : IWorkoutSessionRepository
+    internal sealed class WorkoutSessionRepository : Repository<WorkoutSession>, IWorkoutSessionRepository
     {
-        public Task<int> CountAsync(CancellationToken cancellationToken = default)
+        public WorkoutSessionRepository(SystemContext context) : base(context)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<WorkoutSession> CreateAsync(WorkoutSession entity, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteAsync(int id, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteRangeAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<WorkoutSession>> GetAllAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<WorkoutSession?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<PagedResult<WorkoutSession>> GetPagedDynamicAsync(string? searchValue, string? sortColumn, string? sortDirection, int pageIndex, int pageSize, Func<IQueryable<WorkoutSession>, IQueryable<WorkoutSession>>? include = null, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IQueryable<WorkoutSession> GetQueryable()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task SaveChangesAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateAsync(WorkoutSession entity, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
         }
     }
 }

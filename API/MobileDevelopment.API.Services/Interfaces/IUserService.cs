@@ -1,8 +1,7 @@
 using MobileDevelopment.API.Domain.Entities;
 using MobileDevelopment.API.Models.DTO.Users;
 using MobileDevelopment.API.Models.Wrappers;
-using MobileDevelopment.API.Services.Commands.User.LoginCommand;
-using MobileDevelopment.API.Services.Commands.User.RegisterCommand;
+using MobileDevelopment.API.Services.Commands.User;
 
 namespace MobileDevelopment.API.Services.Interfaces
 {
@@ -10,7 +9,7 @@ namespace MobileDevelopment.API.Services.Interfaces
     {
         Task<Result<UserDto>> GetByIdAsync(int id, CancellationToken token = default);
         Task<Result<User>> ValidateCredentialsAsync(LoginCommand loginCmd, CancellationToken cancellationToken = default);
-        Task AddRefreshToken(int userId, string refreshToken, CancellationToken cancellationToken = default);
         Task<Result<User>> RegisterUserAsync(RegisterCommand cmd, CancellationToken token = default);
+        Task<Result<bool>> RemoveUserAsync(int id, CancellationToken token = default);
     }
 }

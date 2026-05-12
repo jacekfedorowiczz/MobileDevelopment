@@ -38,11 +38,11 @@ namespace MobileDevelopment.API.Models.Extensions
             new(
                 Id: profile.Id,
                 UserId: profile.UserId,
+                Avatar: profile.Avatar,
                 Age: profile.Age,
                 Weight: profile.Weight,
                 Height: profile.Height,
                 PreferredWeightUnit: profile.PreferredWeightUnit,
-                IsDarkModeEnabled: profile.IsDarkModeEnabled,
                 CurrentGoal: profile.CurrentGoal
             );
 

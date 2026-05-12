@@ -1,7 +1,7 @@
 ﻿using MobileDevelopment.API.Domain.Base;
 using MobileDevelopment.API.Models.Pagination;
 using MobileDevelopment.API.Models.Wrappers;
-using MobileDevelopment.API.Persistence.Interfaces;
+using MobileDevelopment.API.Persistence.Interfaces.Base;
 using MobileDevelopment.API.Services.Interfaces.Base;
 using MobileDevelopment.API.Services.Model;
 
