@@ -1,8 +1,8 @@
-# MobileDevelopment
+# MobileDevelopment - FitTracker
 
 ENG
 
-MobileDevelopment is a full-stack fitness mobile application built with a React Native client and an ASP.NET Core Web API backend. The app supports workout logging, diet tracking, gyms, exercises, achievements, user profiles, health calculators, Redis-backed caching, and API observability through health checks and Scalar documentation.
+FitTracker is a full-stack fitness mobile application built with a React Native client and an ASP.NET Core Web API backend. The app supports workout logging, diet tracking, gyms, exercises, achievements, user profiles, health calculators, Redis-backed caching, and API observability through health checks and Scalar documentation.
 
 ## Features
 
@@ -308,7 +308,7 @@ npm test
 
 PL
 
-MobileDevelopment to aplikacja fitness składająca się z aplikacji mobilnej React Native oraz backendu ASP.NET Core Web API. Projekt obsługuje dziennik treningowy, dietę, siłownie, ćwiczenia, osiągnięcia, profil użytkownika, kalkulatory zdrowotne, cache z Redisem oraz podstawową obserwowalność API przez health checki i dokumentację Scalar.
+FitTracker to aplikacja fitness składająca się z aplikacji mobilnej React Native oraz backendu ASP.NET Core Web API. Projekt obsługuje dziennik treningowy, dietę, siłownie, ćwiczenia, osiągnięcia, profil użytkownika, kalkulatory zdrowotne, cache z Redisem oraz podstawową obserwowalność API przez health checki i dokumentację Scalar.
 
 
 ## Funkcjonalności
