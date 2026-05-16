@@ -1,8 +1,8 @@
 # MobileDevelopment
 
-MobileDevelopment is a full-stack fitness mobile application built with a React Native client and an ASP.NET Core Web API backend. The app supports workout logging, diet tracking, gyms, exercises, achievements, user profiles, health calculators, Redis-backed caching, and API observability through health checks and Scalar documentation.
+ENG
 
-Repository: [github.com/jacekfedorowiczz/MobileDevelopment](https://github.com/jacekfedorowiczz/MobileDevelopment)
+MobileDevelopment is a full-stack fitness mobile application built with a React Native client and an ASP.NET Core Web API backend. The app supports workout logging, diet tracking, gyms, exercises, achievements, user profiles, health calculators, Redis-backed caching, and API observability through health checks and Scalar documentation.
 
 ## Features
 
@@ -304,3 +304,309 @@ npm test
 - Keep user-specific data out of generic output cache policies unless the cache key varies safely per user.
 - Update both API DTOs and client TypeScript interfaces when changing API contracts.
 
+===========================================================================================================================================================================================
+
+PL
+
+MobileDevelopment to aplikacja fitness składająca się z aplikacji mobilnej React Native oraz backendu ASP.NET Core Web API. Projekt obsługuje dziennik treningowy, dietę, siłownie, ćwiczenia, osiągnięcia, profil użytkownika, kalkulatory zdrowotne, cache z Redisem oraz podstawową obserwowalność API przez health checki i dokumentację Scalar.
+
+
+## Funkcjonalności
+
+- Logowanie i rejestracja użytkowników z JWT oraz refresh tokenami.
+- Tworzenie treningów, serii, RPE, czasu trwania i historycznych dat treningu.
+- Katalog ćwiczeń z grupami mięśniowymi, poziomem trudności, zdjęciami i filtrowaniem.
+- Plany diet, dni diety, posiłki, makroskładniki i dzienne podsumowania.
+- Lista siłowni z możliwością dodawania przez użytkownika lub administratora.
+- Profil użytkownika ze zdjęciem, statystykami treningowymi, osiągnięciami i zmianą motywu.
+- System osiągnięć obsługiwany przez background worker.
+- Kalkulatory: BMI, 1RM, BMR, YMCA body fat oraz idealna waga.
+- Rozproszony cache z Redisem oraz fallbackiem do pamięci.
+- Health checki, Scalar, Serilog, CQRS z MediatR i FluentValidation.
+
+## Stack technologiczny
+
+### Backend
+
+- ASP.NET Core Web API, .NET 10
+- Entity Framework Core
+- SQL Server 2022
+- Redis 7
+- MediatR / CQRS
+- FluentValidation
+- Serilog
+- Scalar API Reference
+- ASP.NET Core Health Checks
+- Background services
+- Docker / Docker Compose
+
+### Klient mobilny
+
+- React Native 0.84
+- React 19
+- TypeScript
+- React Navigation
+- Axios
+- Zustand
+- AsyncStorage
+- React Native Vector Icons
+- React Native Image Picker
+
+## Struktura projektu
+
+```text
+.
+├── API/
+│   ├── MobileDevelopment.API/              # Główna aplikacja ASP.NET Core API
+│   ├── MobileDevelopment.API.Domain/       # Encje domenowe, enumy, ustawienia auth
+│   ├── MobileDevelopment.API.Models/       # DTO, wrappery odpowiedzi, paginacja
+│   ├── MobileDevelopment.API.Persistence/  # DbContext, repozytoria, migracje, seeding
+│   ├── MobileDevelopment.API.Services/     # Serwisy, CQRS, kalkulatory, workery
+│   └── MobileDevelopment.API.UnitTests/    # Testy xUnit
+├── Client/                                 # Aplikacja mobilna React Native
+└── compose.yaml                            # API + SQL Server + Redis
+```
+
+## Wymagania
+
+- Docker Desktop
+- .NET 10 SDK
+- Node.js 22.11+
+- npm
+- Android Studio / emulator Androida
+- Xcode / iOS Simulator dla iOS na macOS
+
+## Szybkie uruchomienie przez Docker
+
+Najprościej uruchomić backend przez Docker Compose. Startowane są:
+
+- API: `http://localhost:8080`
+- SQL Server: port hosta `1434`
+- Redis: port hosta `6379`
+
+Z katalogu głównego repozytorium:
+
+```bash
+docker compose up --build
+```
+
+API automatycznie uruchamia migracje EF Core i seeduje przykładowe dane.
+
+Przydatne adresy:
+
+- API base: `http://localhost:8080/api/v1/mobile`
+- Health check: `http://localhost:8080/health`
+- Readiness check: `http://localhost:8080/health/ready`
+- OpenAPI JSON: `http://localhost:8080/openapi/v1.json`
+- Scalar docs: `http://localhost:8080/scalar/v1`
+
+Zatrzymanie kontenerów:
+
+```bash
+docker compose down
+```
+
+Zatrzymanie i usunięcie wolumenów:
+
+```bash
+docker compose down -v
+```
+
+## Lokalne uruchomienie API
+
+Możesz uruchomić API bezpośrednio przez .NET SDK, zostawiając SQL Server i Redis w Dockerze.
+
+1. Z katalogu głównego repozytorium uruchom SQL Server i Redis:
+
+```bash
+docker compose up db redis
+```
+
+1. Skonfiguruj connection stringi i JWT. Domyślne wartości z Docker Compose:
+
+```text
+ConnectionStrings__MsSqlDb=Server=localhost,1434;Database=MobileDevelopmentDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True;MultipleActiveResultSets=true
+ConnectionStrings__Redis=localhost:6379
+Jwt__SecretKey=CHANGE-ME-TO-A-SECURE-KEY-AT-LEAST-32-CHARS-LONG!!
+Jwt__Issuer=FitTrackerAPI
+Jwt__Audience=FitTrackerMobileClient
+```
+
+1. W drugim terminalu uruchom API:
+
+```bash
+cd API
+dotnet run --project MobileDevelopment.API/MobileDevelopment.API.csproj
+```
+
+1. Uruchom testy:
+
+```bash
+dotnet test MobileDevelopment.API.UnitTests/MobileDevelopment.API.UnitTests.csproj
+```
+
+## Uruchomienie aplikacji mobilnej
+
+Instalacja zależności:
+
+```bash
+cd Client
+npm install
+```
+
+Start Metro:
+
+```bash
+npm start
+```
+
+Android:
+
+```bash
+npm run android
+```
+
+iOS:
+
+```bash
+npm run ios
+```
+
+### Konfiguracja adresu API
+
+Adres API dla aplikacji mobilnej znajduje się w:
+
+```text
+Client/src/api/api-config.tsx
+```
+
+Domyślne wartości developerskie:
+
+- Android: `http://192.168.0.10:8080/api/v1/mobile`
+- iOS: `http://localhost:8080/api/v1/mobile`
+
+Jeśli API działa na innym adresie lub zmieni się IP komputera w sieci lokalnej, trzeba zaktualizować adres dla Androida. W emulatorze Androida czasami używa się również `10.0.2.2`, zależnie od konfiguracji.
+
+## Przykładowe flow aplikacji
+
+1. Użytkownik rejestruje konto albo loguje się.
+2. API zwraca tokeny JWT, a klient zapisuje stan autoryzacji.
+3. Dashboard pobiera podsumowanie treningów i diety aktualnego użytkownika.
+4. Użytkownik tworzy trening i dodaje serie z ćwiczeniami, ciężarem, powtórzeniami, czasem oraz RPE.
+5. Backend przelicza statystyki treningu i unieważnia powiązane wpisy cache.
+6. Po powrocie na Dashboard lub Profil klient odświeża dane przy fokusie ekranu.
+7. Workery w tle czyszczą stare tokeny i sprawdzają osiągnięcia.
+8. Odblokowane osiągnięcia są widoczne w profilu i na ekranie osiągnięć.
+
+Inne typowe flow:
+
+- Utworzenie planu diety, ustawienie kalorii i makro, a następnie dodawanie posiłków.
+- Przeglądanie ćwiczeń po grupach mięśniowych i tworzenie własnych ćwiczeń.
+- Przeglądanie siłowni i nawigacja do siłowni z uzupełnionymi współrzędnymi.
+- Korzystanie z kalkulatorów BMI, 1RM, BMR, body fat i idealnej wagi.
+
+## Dokumentacja API
+
+W trybie Development API udostępnia OpenAPI i Scalar:
+
+- OpenAPI JSON: `http://localhost:8080/openapi/v1.json`
+- Scalar UI: `http://localhost:8080/scalar/v1`
+
+Scalar pozwala wygodnie przeglądać i testować endpointy API z poziomu przeglądarki.
+
+## Health checki
+
+API udostępnia:
+
+```text
+GET /health
+GET /health/ready
+```
+
+Obecnie health check sprawdza m.in. połączenie z bazą danych przez EF Core. Endpointy są przydatne do lokalnej diagnostyki, Docker Compose oraz deployment probes.
+
+## Cache
+
+Backend używa `IDistributedCache` przez własny `ICacheService`.
+
+- Redis jest używany, gdy skonfigurowano `ConnectionStrings:Redis`.
+- Jeśli Redis nie jest skonfigurowany, aplikacja używa cache w pamięci.
+- Cache jest wersjonowany obszarami, co ułatwia unieważnianie danych po zapisach.
+
+Przykładowe obszary cache:
+
+- Dashboard użytkownika
+- Ćwiczenia i grupy mięśniowe
+- Siłownie
+- Osiągnięcia
+
+Middleware `OutputCache` jest włączony, ale główny cache aplikacji jest na poziomie serwisów, ponieważ większość endpointów mobilnych jest autoryzowana i zależna od użytkownika.
+
+## Logowanie
+
+Logowanie jest skonfigurowane przez Serilog w:
+
+```text
+API/MobileDevelopment.API/appsettings.json
+```
+
+Logi trafiają do:
+
+- konsoli,
+- plików rotowanych `Logs/log-.txt`.
+
+API ma również middleware mierzący czas żądań i logujący wolniejsze requesty.
+
+## Baza danych i seeding
+
+Migracje EF Core znajdują się w:
+
+```text
+API/MobileDevelopment.API.Persistence/Migrations
+```
+
+Baza jest seedowana przykładowymi użytkownikami, profilami, ćwiczeniami, grupami mięśniowymi, siłowniami, dietami, treningami, osiągnięciami, postami i powiązanymi danymi.
+
+Przy starcie API migracje są aplikowane automatycznie:
+
+```csharp
+context.Database.Migrate();
+```
+
+## Testy i lint
+
+Testy backendu:
+
+```bash
+cd API
+dotnet test MobileDevelopment.API.UnitTests/MobileDevelopment.API.UnitTests.csproj
+```
+
+Build backendu:
+
+```bash
+cd API
+dotnet build MobileDevelopment.API/MobileDevelopment.API.csproj
+```
+
+Lint klienta:
+
+```bash
+cd Client
+npm run lint
+```
+
+Testy klienta:
+
+```bash
+cd Client
+npm test
+```
+
+## Notatki developerskie
+
+- Handlery CQRS powinny być możliwe jak najmniej rozbudowane. Logika biznesowa powinna żyć w serwisach, a dostęp do bazy w repozytoriach.
+- Kontrakty API powinny korzystać z DTO z `MobileDevelopment.API.Models`.
+- Odpowiedzi API powinny konsekwentnie używać wrapperów `Result<T>`.
+- Dane zależne od użytkownika nie powinny trafiać do ogólnego OutputCache bez bezpiecznego vary po użytkowniku.
+- Przy zmianach kontraktów API trzeba aktualizować zarówno DTO backendu, jak i typy TypeScript w kliencie.
