@@ -1,3 +1,6 @@
+using MobileDevelopment.API.Models.DTO.Users;
+using MobileDevelopment.API.Models.DTO.WorkoutSets;
+
 namespace MobileDevelopment.API.Models.DTO.WorkoutSessions
 {
     public sealed record WorkoutSessionDto(
@@ -8,16 +11,35 @@ namespace MobileDevelopment.API.Models.DTO.WorkoutSessions
         DateTime StartTime,
         DateTime? EndTime,
         int? GlobalSessionRpe,
-        MobileDevelopment.API.Models.DTO.Users.UserDto? User = null,
-        System.Collections.Generic.ICollection<MobileDevelopment.API.Models.DTO.WorkoutSets.WorkoutSetDto>? Sets = null
+        UserDto? User = null,
+        ICollection<WorkoutSetDto>? Sets = null
     );
 
-    public sealed record CreateEditWorkoutSessionDto(
+    public sealed record WorkoutSessionSummaryDto(
+        int Id,
         int UserId,
         string Name,
         string? Description,
         DateTime StartTime,
         DateTime? EndTime,
-        int? GlobalSessionRpe
+        int? GlobalSessionRpe,
+        int ExerciseCount,
+        int SetCount
+    );
+
+    public sealed record CreateEditWorkoutSessionDto(
+        string Name,
+        string? Description,
+        DateTime StartTime,
+        DateTime? EndTime
+    );
+
+    public sealed record CreateWorkoutSessionWithSetsDto(
+        string Name,
+        string? Description,
+        DateTime StartTime,
+        DateTime? EndTime,
+        IEnumerable<CreateEditWorkoutSetDto>? Sets = null
     );
 }
+

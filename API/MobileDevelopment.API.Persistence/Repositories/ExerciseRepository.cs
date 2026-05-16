@@ -5,7 +5,7 @@ using MobileDevelopment.API.Persistence.Repositories.Base;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    public class ExerciseRepository(SystemContext context)
+    public sealed class ExerciseRepository(SystemContext context)
         : Repository<Exercise>(context), IExerciseRepository
     {
     }

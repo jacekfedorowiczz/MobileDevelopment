@@ -1,18 +1,17 @@
 using MediatR;
 using MobileDevelopment.API.Models.Wrappers;
+using MobileDevelopment.API.Services.Interfaces;
 using MobileDevelopment.API.Services.Interfaces.Commands;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobileDevelopment.API.Services.Commands.DietDay
 {
-    public sealed record RemoveDietDayCommand(int Id) : IRequest<Result<bool>>, IRemoveCommand;
+    public sealed record RemoveDietDayCommand(int Id) : IRequest<Result>, IRemoveCommand;
 
-    public sealed class RemoveDietDayCommandHandler : IRequestHandler<RemoveDietDayCommand, Result<bool>>
+    public sealed class RemoveDietDayCommandHandler(IDietDayService dietDayService) : IRequestHandler<RemoveDietDayCommand, Result>
     {
-        public Task<Result<bool>> Handle(RemoveDietDayCommand request, CancellationToken cancellationToken)
+        public Task<Result> Handle(RemoveDietDayCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return dietDayService.DeleteAsync(request.Id, cancellationToken);
         }
     }
 }

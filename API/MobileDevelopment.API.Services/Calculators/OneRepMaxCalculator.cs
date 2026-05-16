@@ -2,11 +2,17 @@
 
 namespace MobileDevelopment.API.Services.Calculators
 {
-    internal sealed class OneRepMaxCalculator : IOneRepMaxCalculator
+    public sealed class OneRepMaxCalculator : IOneRepMaxCalculator
     {
         public decimal Calculate(decimal weight, int reps)
         {
-            throw new NotImplementedException();
+            if (reps == 1)
+            {
+                return Math.Round(weight, 1, MidpointRounding.AwayFromZero);
+            }
+
+            var oneRepMax = weight * (1m + reps / 30m);
+            return Math.Round(oneRepMax, 1, MidpointRounding.AwayFromZero);
         }
     }
 }

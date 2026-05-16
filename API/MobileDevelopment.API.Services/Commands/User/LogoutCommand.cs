@@ -36,7 +36,7 @@ namespace MobileDevelopment.API.Services.Commands.User
             }
             catch (Exception e)
             {
-                _logger.LogError("Wystąpił błąd podczas revokowania refresh tokenu! {Message}", e.Message);
+                _logger.LogError("An error occurred while revoking the refresh token: {Message}", e.Message);
                 return Result<bool>.Failure(e.Message);
             }
 

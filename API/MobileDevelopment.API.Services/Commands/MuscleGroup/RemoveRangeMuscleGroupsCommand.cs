@@ -1,9 +1,6 @@
 using MediatR;
 using MobileDevelopment.API.Models.Wrappers;
 using MobileDevelopment.API.Services.Interfaces.Commands;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobileDevelopment.API.Services.Commands.MuscleGroup
 {
@@ -13,7 +10,7 @@ namespace MobileDevelopment.API.Services.Commands.MuscleGroup
     {
         public Task<Result<bool>> Handle(RemoveRangeMuscleGroupsCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

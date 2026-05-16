@@ -1,8 +1,10 @@
 using MobileDevelopment.API.Domain.Entities;
+using MobileDevelopment.API.Models.DTO.Achievements;
 using MobileDevelopment.API.Models.DTO.Comments;
 using MobileDevelopment.API.Models.DTO.DietDays;
 using MobileDevelopment.API.Models.DTO.Diets;
 using MobileDevelopment.API.Models.DTO.Exercises;
+using MobileDevelopment.API.Models.DTO.Gyms;
 using MobileDevelopment.API.Models.DTO.Meals;
 using MobileDevelopment.API.Models.DTO.MuscleGroups;
 using MobileDevelopment.API.Models.DTO.PostLikes;
@@ -58,6 +60,11 @@ namespace MobileDevelopment.API.Services.Mapping
                 entity.Height,
                 entity.PreferredWeightUnit,
                 entity.CurrentGoal,
+                entity.DietType,
+                entity.DailyCaloriesGoal,
+                entity.ProteinPercentage,
+                entity.CarbsPercentage,
+                entity.FatPercentage,
                 includeUser && entity.User != null ? entity.User.ToDto() : null,
                 includeInterests && entity.Interests != null ? entity.Interests.Select(i => i.ToDto()).ToList() : null
             );
@@ -151,7 +158,7 @@ namespace MobileDevelopment.API.Services.Mapping
                 entity.EndTime,
                 entity.GlobalSessionRpe,
                 includeUser && entity.User != null ? entity.User.ToDto() : null,
-                includeSets && entity.Sets != null ? entity.Sets.Select(s => s.ToDto()).ToList() : null
+                includeSets && entity.Sets != null ? entity.Sets.Select(s => s.ToDto(includeExercise: true)).ToList() : null
             );
         }
 
@@ -170,6 +177,7 @@ namespace MobileDevelopment.API.Services.Mapping
                 entity.Weight,
                 entity.Reps,
                 entity.Rpe,
+                entity.DurationSeconds,
                 includeWorkoutSession && entity.WorkoutSession != null ? entity.WorkoutSession.ToDto() : null,
                 includeExercise && entity.Exercise != null ? entity.Exercise.ToDto() : null
             );
@@ -187,8 +195,35 @@ namespace MobileDevelopment.API.Services.Mapping
                 entity.Name,
                 entity.Description,
                 entity.IsCompound,
+                entity.IsSystem,
+                entity.CreatedByUserId,
+                entity.ImageUrl,
+                entity.Difficulty,
                 includeTargetedMuscles && entity.TargetedMuscles != null ? entity.TargetedMuscles.Select(m => m.ToDto()).ToList() : null,
                 includeSets && entity.Sets != null ? entity.Sets.Select(s => s.ToDto()).ToList() : null
+            );
+        }
+
+        public static WorkoutSessionSummaryDto ToSummaryDto(this WorkoutSession entity)
+        {
+            if (entity is null)
+            {
+                return null!;
+            }
+
+            var exerciseCount = entity.Sets?.Select(s => s.ExerciseId).Distinct().Count() ?? 0;
+            var setCount = entity.Sets?.Count ?? 0;
+
+            return new WorkoutSessionSummaryDto(
+                entity.Id,
+                entity.UserId,
+                entity.Name,
+                entity.Description,
+                entity.StartTime,
+                entity.EndTime,
+                entity.GlobalSessionRpe,
+                exerciseCount,
+                setCount
             );
         }
 
@@ -260,6 +295,51 @@ namespace MobileDevelopment.API.Services.Mapping
                 entity.Carbs,
                 entity.Fats,
                 includeDietDay && entity.DietDay != null ? entity.DietDay.ToDto() : null
+            );
+        }
+
+        public static GymDto ToDto(this Gym entity)
+        {
+            if (entity is null)
+            {
+                return null!;
+            }
+
+            return new GymDto(
+                entity.Id,
+                entity.Name,
+                entity.Street,
+                entity.City,
+                entity.ZipCode,
+                entity.Latitude,
+                entity.Longitude,
+                entity.Rating,
+                entity.Description,
+                entity.IsActive,
+                entity.CreatedByUserId
+            );
+        }
+
+        public static AchievementDto ToDto(this Achievement entity)
+        {
+            if (entity is null) return null!;
+            return new AchievementDto(
+                entity.Id,
+                entity.Name,
+                entity.Description,
+                entity.IconCode,
+                entity.AchievementType,
+                entity.TargetValue
+            );
+        }
+
+        public static ProfileAchievementDto ToDto(this ProfileAchievement entity)
+        {
+            if (entity is null) return null!;
+            return new ProfileAchievementDto(
+                entity.Id,
+                entity.Achievement.ToDto(),
+                entity.UnlockedAt
             );
         }
     }

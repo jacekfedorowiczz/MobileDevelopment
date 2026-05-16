@@ -8,6 +8,7 @@ namespace MobileDevelopment.API.Models.DTO.WorkoutSets
         decimal Weight,
         int Reps,
         int? Rpe,
+        int? DurationSeconds,
         MobileDevelopment.API.Models.DTO.WorkoutSessions.WorkoutSessionDto? WorkoutSession = null,
         MobileDevelopment.API.Models.DTO.Exercises.ExerciseDto? Exercise = null
     );
@@ -18,6 +19,7 @@ namespace MobileDevelopment.API.Models.DTO.WorkoutSets
         int SetNumber,
         decimal Weight,
         int Reps,
-        int? Rpe
+        int? Rpe,
+        int? DurationSeconds
     );
 }

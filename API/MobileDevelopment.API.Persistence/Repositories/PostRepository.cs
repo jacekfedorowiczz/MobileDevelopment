@@ -5,7 +5,7 @@ using MobileDevelopment.API.Persistence.Repositories.Base;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    public class PostRepository(SystemContext context)
+    public sealed class PostRepository(SystemContext context)
         : Repository<Post>(context), IPostRepository
     {
     }

@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.DietDays;
 using MobileDevelopment.API.Models.Wrappers;
+using MobileDevelopment.API.Services.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,11 +18,11 @@ namespace MobileDevelopment.API.Services.Queries.DietDay
         }
     }
 
-    public sealed class GetDietDayQueryHandler : IRequestHandler<GetDietDayQuery, Result<DietDayDto>>
+    public sealed class GetDietDayQueryHandler(IDietDayService dietDayService) : IRequestHandler<GetDietDayQuery, Result<DietDayDto>>
     {
         public Task<Result<DietDayDto>> Handle(GetDietDayQuery request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return dietDayService.GetByIdAsync(request.Id, cancellationToken);
         }
     }
 }

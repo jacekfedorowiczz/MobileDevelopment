@@ -43,7 +43,12 @@ namespace MobileDevelopment.API.Models.Extensions
                 Weight: profile.Weight,
                 Height: profile.Height,
                 PreferredWeightUnit: profile.PreferredWeightUnit,
-                CurrentGoal: profile.CurrentGoal
+                CurrentGoal: profile.CurrentGoal,
+                DietType: profile.DietType,
+                DailyCaloriesGoal: profile.DailyCaloriesGoal,
+                ProteinPercentage: profile.ProteinPercentage,
+                CarbsPercentage: profile.CarbsPercentage,
+                FatPercentage: profile.FatPercentage
             );
 
         public static ExerciseDto ToDto(this Exercise exercise) =>
@@ -51,7 +56,9 @@ namespace MobileDevelopment.API.Models.Extensions
                 Id: exercise.Id,
                 Name: exercise.Name,
                 Description: exercise.Description,
-                IsCompound: exercise.IsCompound
+                IsCompound: exercise.IsCompound,
+                IsSystem: exercise.IsSystem,
+                CreatedByUserId: exercise.CreatedByUserId
             );
 
         public static MuscleGroupDto ToDto(this MuscleGroup muscleGroup) =>
@@ -79,7 +86,8 @@ namespace MobileDevelopment.API.Models.Extensions
                 SetNumber: set.SetNumber,
                 Weight: set.Weight,
                 Reps: set.Reps,
-                Rpe: set.Rpe
+                Rpe: set.Rpe,
+                DurationSeconds: set.DurationSeconds
             );
 
         public static DietDto ToDto(this Diet diet) =>

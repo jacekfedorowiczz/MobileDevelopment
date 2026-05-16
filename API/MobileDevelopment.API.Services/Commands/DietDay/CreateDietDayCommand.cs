@@ -2,8 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.DietDays;
 using MobileDevelopment.API.Models.Wrappers;
-using System.Threading;
-using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Commands.DietDay
 {
@@ -17,11 +16,11 @@ namespace MobileDevelopment.API.Services.Commands.DietDay
         }
     }
 
-    public sealed class CreateDietDayCommandHandler : IRequestHandler<CreateDietDayCommand, Result<DietDayDto>>
+    public sealed class CreateDietDayCommandHandler(IDietDayService dietDayService) : IRequestHandler<CreateDietDayCommand, Result<DietDayDto>>
     {
         public Task<Result<DietDayDto>> Handle(CreateDietDayCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return dietDayService.CreateAsync(request.Dto, cancellationToken);
         }
     }
 }

@@ -2,8 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.WorkoutSessions;
 using MobileDevelopment.API.Models.Wrappers;
-using System.Threading;
-using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Commands.WorkoutSession
 {
@@ -17,11 +16,11 @@ namespace MobileDevelopment.API.Services.Commands.WorkoutSession
         }
     }
 
-    public sealed class CreateWorkoutSessionCommandHandler : IRequestHandler<CreateWorkoutSessionCommand, Result<WorkoutSessionDto>>
+    public sealed class CreateWorkoutSessionCommandHandler(IWorkoutSessionService workoutSessionService) : IRequestHandler<CreateWorkoutSessionCommand, Result<WorkoutSessionDto>>
     {
         public Task<Result<WorkoutSessionDto>> Handle(CreateWorkoutSessionCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return workoutSessionService.CreateSessionAsync(request.Dto, cancellationToken);
         }
     }
 }

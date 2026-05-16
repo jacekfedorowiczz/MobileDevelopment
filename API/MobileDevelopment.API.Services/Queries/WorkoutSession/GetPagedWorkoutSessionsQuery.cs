@@ -5,10 +5,11 @@ using MobileDevelopment.API.Models.Pagination;
 using MobileDevelopment.API.Models.Wrappers;
 using System.Threading;
 using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Queries.WorkoutSession
 {
-    public sealed record GetPagedWorkoutSessionsQuery(int PageNumber = 1, int PageSize = 10) : IRequest<Result<PagedResult<WorkoutSessionDto>>>;
+    public sealed record GetPagedWorkoutSessionsQuery(int PageNumber = 1, int PageSize = 10) : IRequest<Result<PagedResult<WorkoutSessionSummaryDto>>>;
 
     public sealed class GetPagedWorkoutSessionsQueryValidator : AbstractValidator<GetPagedWorkoutSessionsQuery>
     {
@@ -19,11 +20,11 @@ namespace MobileDevelopment.API.Services.Queries.WorkoutSession
         }
     }
 
-    public sealed class GetPagedWorkoutSessionsQueryHandler : IRequestHandler<GetPagedWorkoutSessionsQuery, Result<PagedResult<WorkoutSessionDto>>>
+    public sealed class GetPagedWorkoutSessionsQueryHandler(IWorkoutSessionService workoutSessionService) : IRequestHandler<GetPagedWorkoutSessionsQuery, Result<PagedResult<WorkoutSessionSummaryDto>>>
     {
-        public Task<Result<PagedResult<WorkoutSessionDto>>> Handle(GetPagedWorkoutSessionsQuery request, CancellationToken cancellationToken)
+        public Task<Result<PagedResult<WorkoutSessionSummaryDto>>> Handle(GetPagedWorkoutSessionsQuery request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return workoutSessionService.GetPagedSessionsForCurrentUserAsync(request.PageNumber, request.PageSize, cancellationToken);
         }
     }
 }

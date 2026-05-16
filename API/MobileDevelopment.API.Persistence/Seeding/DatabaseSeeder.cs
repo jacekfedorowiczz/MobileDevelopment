@@ -15,6 +15,7 @@ namespace MobileDevelopment.API.Persistence.Seeding
 
             SeedMuscleGroups(systemContext);
             SeedExercises(systemContext);
+            SeedExerciseMuscleGroups(systemContext);
             SeedTags(systemContext);
             SeedUsersAndProfiles(systemContext, hasher);
             SeedWorkoutSessions(systemContext);
@@ -25,6 +26,8 @@ namespace MobileDevelopment.API.Persistence.Seeding
             SeedDiets(systemContext);
             SeedDietDays(systemContext);
             SeedMeals(systemContext);
+            SeedGyms(systemContext);
+            SeedAchievements(systemContext);
         }
 
         public static async Task SeedAsync(DbContext context, IPasswordHasher<User> hasher, CancellationToken ct)
@@ -33,6 +36,7 @@ namespace MobileDevelopment.API.Persistence.Seeding
 
             await SeedMuscleGroupsAsync(systemContext, ct);
             await SeedExercisesAsync(systemContext, ct);
+            await SeedExerciseMuscleGroupsAsync(systemContext, ct);
             await SeedTagsAsync(systemContext, ct);
             await SeedUsersAndProfilesAsync(systemContext, hasher, ct);
             await SeedWorkoutSessionsAsync(systemContext, ct);
@@ -43,6 +47,8 @@ namespace MobileDevelopment.API.Persistence.Seeding
             await SeedDietsAsync(systemContext, ct);
             await SeedDietDaysAsync(systemContext, ct);
             await SeedMealsAsync(systemContext, ct);
+            await SeedGymsAsync(systemContext, ct);
+            await SeedAchievementsAsync(systemContext, ct);
         }
 
         // ──────────────────────────────────────────────
@@ -71,6 +77,33 @@ namespace MobileDevelopment.API.Persistence.Seeding
         }
 
         // ──────────────────────────────────────────────
+        // Achievements
+        // ──────────────────────────────────────────────
+
+        private static void SeedAchievements(SystemContext ctx)
+        {
+            if (ctx.Achievements.Any()) return;
+            ctx.Achievements.AddRange(BuildAchievements());
+            ctx.SaveChanges();
+        }
+
+        private static async Task SeedAchievementsAsync(SystemContext ctx, CancellationToken ct)
+        {
+            if (await ctx.Achievements.AnyAsync(ct)) return;
+            ctx.Achievements.AddRange(BuildAchievements());
+            await ctx.SaveChangesAsync(ct);
+        }
+
+        private static IEnumerable<Achievement> BuildAchievements() =>
+        [
+            new Achievement { Name = "10 Treningów", Description = "Ukończono 10 sesji treningowych", IconCode = "award", AchievementType = AchievementType.WorkoutCount, TargetValue = 10 },
+            new Achievement { Name = "50 Treningów", Description = "Ukończono 50 sesji treningowych", IconCode = "award", AchievementType = AchievementType.WorkoutCount, TargetValue = 50 },
+            new Achievement { Name = "100 Treningów", Description = "Ukończono 100 sesji treningowych", IconCode = "award", AchievementType = AchievementType.WorkoutCount, TargetValue = 100 },
+            new Achievement { Name = "Pierwszy post", Description = "Opublikuj swój pierwszy post", IconCode = "message-circle", AchievementType = AchievementType.PostCount, TargetValue = 1 },
+            new Achievement { Name = "Siła drzemie we mnie", Description = "Wycisnąłeś 100 kg na klatkę (symulowane)", IconCode = "zap", AchievementType = AchievementType.PostCount, TargetValue = 100 }
+        ];
+
+        // ──────────────────────────────────────────────
         // Exercises
         // ──────────────────────────────────────────────
 
@@ -90,22 +123,80 @@ namespace MobileDevelopment.API.Persistence.Seeding
 
         private static IEnumerable<Exercise> BuildExercises() =>
         [
-            new Exercise { Name = "Bench Press",        Description = "Barbell flat bench press.",    IsCompound = true  },
-            new Exercise { Name = "Squat",              Description = "Barbell back squat.",           IsCompound = true  },
-            new Exercise { Name = "Deadlift",           Description = "Conventional barbell deadlift.", IsCompound = true },
-            new Exercise { Name = "Overhead Press",     Description = "Standing barbell press.",       IsCompound = true  },
-            new Exercise { Name = "Barbell Row",        Description = "Bent-over barbell row.",        IsCompound = true  },
-            new Exercise { Name = "Pull-up",            Description = "Bodyweight pull-up.",           IsCompound = true  },
-            new Exercise { Name = "Dumbbell Curl",      Description = "Standing dumbbell bicep curl.", IsCompound = false },
-            new Exercise { Name = "Tricep Pushdown",    Description = "Cable tricep pushdown.",        IsCompound = false },
-            new Exercise { Name = "Leg Press",          Description = "Machine leg press.",            IsCompound = true  },
-            new Exercise { Name = "Lateral Raise",      Description = "Dumbbell lateral raise.",       IsCompound = false },
-            new Exercise { Name = "Romanian Deadlift",  Description = "Barbell RDL for hamstrings.",   IsCompound = true  },
-            new Exercise { Name = "Incline Bench Press",Description = "Incline barbell bench press.",  IsCompound = true  },
-            new Exercise { Name = "Cable Fly",          Description = "Cable chest fly.",              IsCompound = false },
-            new Exercise { Name = "Face Pull",          Description = "Rear delt face pull.",          IsCompound = false },
-            new Exercise { Name = "Plank",              Description = "Isometric core hold.",          IsCompound = false },
+            new Exercise { Name = "Bench Press",         Description = "Barbell flat bench press.",     IsCompound = true,  Difficulty = ExerciseDifficulty.Intermediate, ImageUrl = "https://images.unsplash.com/photo-1571019613914-85f342c6a11e?auto=format&fit=crop&w=1200&q=80" },
+            new Exercise { Name = "Squat",               Description = "Barbell back squat.",           IsCompound = true,  Difficulty = ExerciseDifficulty.Intermediate, ImageUrl = "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&fit=crop&w=1200&q=80" },
+            new Exercise { Name = "Deadlift",            Description = "Conventional barbell deadlift.", IsCompound = true,  Difficulty = ExerciseDifficulty.Advanced,     ImageUrl = "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=1200&q=80" },
+            new Exercise { Name = "Overhead Press",      Description = "Standing barbell press.",       IsCompound = true,  Difficulty = ExerciseDifficulty.Intermediate },
+            new Exercise { Name = "Barbell Row",         Description = "Bent-over barbell row.",        IsCompound = true,  Difficulty = ExerciseDifficulty.Intermediate },
+            new Exercise { Name = "Pull-up",             Description = "Bodyweight pull-up.",           IsCompound = true,  Difficulty = ExerciseDifficulty.Advanced },
+            new Exercise { Name = "Dumbbell Curl",       Description = "Standing dumbbell bicep curl.", IsCompound = false, Difficulty = ExerciseDifficulty.Beginner },
+            new Exercise { Name = "Tricep Pushdown",     Description = "Cable tricep pushdown.",        IsCompound = false, Difficulty = ExerciseDifficulty.Beginner },
+            new Exercise { Name = "Leg Press",           Description = "Machine leg press.",            IsCompound = true,  Difficulty = ExerciseDifficulty.Beginner },
+            new Exercise { Name = "Lateral Raise",       Description = "Dumbbell lateral raise.",       IsCompound = false, Difficulty = ExerciseDifficulty.Beginner },
+            new Exercise { Name = "Romanian Deadlift",   Description = "Barbell RDL for hamstrings.",   IsCompound = true,  Difficulty = ExerciseDifficulty.Intermediate },
+            new Exercise { Name = "Incline Bench Press", Description = "Incline barbell bench press.",  IsCompound = true,  Difficulty = ExerciseDifficulty.Intermediate },
+            new Exercise { Name = "Cable Fly",           Description = "Cable chest fly.",              IsCompound = false, Difficulty = ExerciseDifficulty.Beginner },
+            new Exercise { Name = "Face Pull",           Description = "Rear delt face pull.",          IsCompound = false, Difficulty = ExerciseDifficulty.Beginner },
+            new Exercise { Name = "Plank",               Description = "Isometric core hold.",          IsCompound = false, Difficulty = ExerciseDifficulty.Beginner },
         ];
+
+        private static void SeedExerciseMuscleGroups(SystemContext ctx)
+        {
+            var exercises = ctx.Exercises
+                .Include(e => e.TargetedMuscles)
+                .ToList();
+
+            AssignExerciseMuscleGroups(exercises, ctx.MuscleGroups.ToList());
+            ctx.SaveChanges();
+        }
+
+        private static async Task SeedExerciseMuscleGroupsAsync(SystemContext ctx, CancellationToken ct)
+        {
+            var exercises = await ctx.Exercises
+                .Include(e => e.TargetedMuscles)
+                .ToListAsync(ct);
+
+            var muscleGroups = await ctx.MuscleGroups.ToListAsync(ct);
+            AssignExerciseMuscleGroups(exercises, muscleGroups);
+            await ctx.SaveChangesAsync(ct);
+        }
+
+        private static void AssignExerciseMuscleGroups(IEnumerable<Exercise> exercises, IEnumerable<MuscleGroupEntity> muscleGroups)
+        {
+            var muscleGroupsByName = muscleGroups.ToDictionary(mg => mg.Name, StringComparer.OrdinalIgnoreCase);
+            var mappings = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Bench Press"] = ["Chest", "Triceps", "Shoulders"],
+                ["Squat"] = ["Quads", "Glutes", "Hamstrings", "Core"],
+                ["Deadlift"] = ["Lower Back", "Glutes", "Hamstrings", "Traps"],
+                ["Overhead Press"] = ["Shoulders", "Triceps", "Core"],
+                ["Barbell Row"] = ["Back", "Lats", "Biceps"],
+                ["Pull-up"] = ["Lats", "Back", "Biceps"],
+                ["Dumbbell Curl"] = ["Biceps", "Forearms"],
+                ["Tricep Pushdown"] = ["Triceps"],
+                ["Leg Press"] = ["Quads", "Glutes", "Hamstrings"],
+                ["Lateral Raise"] = ["Shoulders"],
+                ["Romanian Deadlift"] = ["Hamstrings", "Glutes", "Lower Back"],
+                ["Incline Bench Press"] = ["Chest", "Shoulders", "Triceps"],
+                ["Cable Fly"] = ["Chest"],
+                ["Face Pull"] = ["Shoulders", "Traps"],
+                ["Plank"] = ["Core"]
+            };
+
+            foreach (var exercise in exercises)
+            {
+                if (exercise.TargetedMuscles.Count > 0 || !mappings.TryGetValue(exercise.Name, out var groupNames))
+                    continue;
+
+                foreach (var groupName in groupNames)
+                {
+                    if (muscleGroupsByName.TryGetValue(groupName, out var muscleGroup))
+                    {
+                        exercise.TargetedMuscles.Add(muscleGroup);
+                    }
+                }
+            }
+        }
 
         // ──────────────────────────────────────────────
         // Tags
@@ -222,21 +313,34 @@ namespace MobileDevelopment.API.Persistence.Seeding
         private static IEnumerable<WorkoutSession> BuildWorkoutSessions(SystemContext ctx)
         {
             var users = ctx.Users.ToList();
-            var sessionNames = new[] { "Push Day", "Pull Day", "Leg Day", "Upper Body", "Full Body", "Cardio Session" };
+            var sessionNames = new[] { "Push A", "Pull A", "Leg Day", "Upper Body", "Full Body", "Push B" };
+            var descriptions = new[]
+            {
+                "Main compound lift plus accessory work.",
+                "Controlled tempo and clean reps.",
+                "Moderate volume with progressive overload.",
+                "Technique-focused session.",
+                "Hypertrophy block workout.",
+                "Lower intensity deload-style session."
+            };
             var list = new List<WorkoutSession>();
             for (int i = 0; i < users.Count; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    var start = DateTime.UtcNow.AddDays(-(i * 3 + j));
+                    var start = DateTime.UtcNow.Date
+                        .AddDays(-(i * 3 + j))
+                        .AddHours(16 + ((i + j) % 4));
+                    var durationMinutes = 50 + ((i + j) % 4) * 10;
+
                     list.Add(new WorkoutSession
                     {
                         UserId = users[i].Id,
                         Name = sessionNames[(i + j) % sessionNames.Length],
-                        Description = $"Training session #{j + 1}",
+                        Description = descriptions[(i + j) % descriptions.Length],
                         StartTime = start,
-                        EndTime = start.AddHours(1.5),
-                        GlobalSessionRpe = 6 + (j % 4),
+                        EndTime = start.AddMinutes(durationMinutes),
+                        GlobalSessionRpe = null,
                     });
                 }
             }
@@ -252,6 +356,8 @@ namespace MobileDevelopment.API.Persistence.Seeding
             if (ctx.WorkoutSets.Any()) return;
             ctx.WorkoutSets.AddRange(BuildWorkoutSets(ctx));
             ctx.SaveChanges();
+            UpdateSeededWorkoutSessionRpe(ctx);
+            ctx.SaveChanges();
         }
 
         private static async Task SeedWorkoutSetsAsync(SystemContext ctx, CancellationToken ct)
@@ -259,29 +365,120 @@ namespace MobileDevelopment.API.Persistence.Seeding
             if (await ctx.WorkoutSets.AnyAsync(ct)) return;
             ctx.WorkoutSets.AddRange(BuildWorkoutSets(ctx));
             await ctx.SaveChangesAsync(ct);
+            await UpdateSeededWorkoutSessionRpeAsync(ctx, ct);
+            await ctx.SaveChangesAsync(ct);
         }
 
         private static IEnumerable<WorkoutSet> BuildWorkoutSets(SystemContext ctx)
         {
             var sessions = ctx.WorkoutSessions.ToList();
-            var exercises = ctx.Exercises.ToList();
+            var exercisesByName = ctx.Exercises.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
             var list = new List<WorkoutSet>();
+
             foreach (var (session, si) in sessions.Select((s, i) => (s, i)))
             {
-                for (int setNum = 1; setNum <= 4; setNum++)
+                var plan = GetWorkoutPlan(session.Name);
+                foreach (var (exerciseName, exerciseIndex) in plan.Select((name, i) => (name, i)))
                 {
-                    list.Add(new WorkoutSet
+                    if (!exercisesByName.TryGetValue(exerciseName, out var exercise))
                     {
-                        WorkoutSessionId = session.Id,
-                        ExerciseId = exercises[(si + setNum) % exercises.Count].Id,
-                        SetNumber = setNum,
-                        Weight = 60m + si * 5 + setNum * 2.5m,
-                        Reps = 8 + setNum,
-                        Rpe = 7 + (setNum % 3),
-                    });
+                        continue;
+                    }
+
+                    var isCompound = exercise.IsCompound;
+                    var baseWeight = GetSeedBaseWeight(exerciseName) + (si % 5) * 2.5m;
+                    var setCount = isCompound ? 3 : 2;
+
+                    for (int setNumber = 1; setNumber <= setCount; setNumber++)
+                    {
+                        list.Add(new WorkoutSet
+                        {
+                            WorkoutSessionId = session.Id,
+                            ExerciseId = exercise.Id,
+                            SetNumber = setNumber,
+                            Weight = Math.Max(0, baseWeight - (setCount - setNumber) * 2.5m),
+                            Reps = isCompound ? Math.Max(5, 9 - setNumber) : 10 + setNumber,
+                            Rpe = Math.Min(9, 6 + setNumber + ((si + exerciseIndex) % 2)),
+                            DurationSeconds = isCompound ? 120 + setNumber * 15 : 60 + setNumber * 10,
+                        });
+                    }
                 }
             }
             return list;
+        }
+
+        private static string[] GetWorkoutPlan(string sessionName)
+        {
+            return sessionName switch
+            {
+                "Push A" => ["Bench Press", "Overhead Press", "Tricep Pushdown", "Lateral Raise"],
+                "Push B" => ["Incline Bench Press", "Cable Fly", "Overhead Press", "Tricep Pushdown"],
+                "Pull A" => ["Deadlift", "Pull-up", "Barbell Row", "Face Pull", "Dumbbell Curl"],
+                "Leg Day" => ["Squat", "Romanian Deadlift", "Leg Press", "Plank"],
+                "Upper Body" => ["Bench Press", "Barbell Row", "Pull-up", "Lateral Raise"],
+                "Full Body" => ["Squat", "Bench Press", "Barbell Row", "Plank"],
+                _ => ["Bench Press", "Squat", "Barbell Row"]
+            };
+        }
+
+        private static decimal GetSeedBaseWeight(string exerciseName)
+        {
+            return exerciseName switch
+            {
+                "Bench Press" => 70m,
+                "Squat" => 95m,
+                "Deadlift" => 120m,
+                "Overhead Press" => 42.5m,
+                "Barbell Row" => 65m,
+                "Pull-up" => 0m,
+                "Dumbbell Curl" => 14m,
+                "Tricep Pushdown" => 35m,
+                "Leg Press" => 160m,
+                "Lateral Raise" => 8m,
+                "Romanian Deadlift" => 85m,
+                "Incline Bench Press" => 60m,
+                "Cable Fly" => 25m,
+                "Face Pull" => 30m,
+                "Plank" => 0m,
+                _ => 40m
+            };
+        }
+
+        private static void UpdateSeededWorkoutSessionRpe(SystemContext ctx)
+        {
+            var sessions = ctx.WorkoutSessions
+                .Include(s => s.Sets)
+                .ToList();
+
+            foreach (var session in sessions)
+            {
+                session.GlobalSessionRpe = CalculateGlobalSessionRpe(session.Sets);
+            }
+        }
+
+        private static async Task UpdateSeededWorkoutSessionRpeAsync(SystemContext ctx, CancellationToken ct)
+        {
+            var sessions = await ctx.WorkoutSessions
+                .Include(s => s.Sets)
+                .ToListAsync(ct);
+
+            foreach (var session in sessions)
+            {
+                session.GlobalSessionRpe = CalculateGlobalSessionRpe(session.Sets);
+            }
+        }
+
+        private static int? CalculateGlobalSessionRpe(IEnumerable<WorkoutSet> sets)
+        {
+            var exerciseAverages = sets
+                .Where(set => set.Rpe.HasValue)
+                .GroupBy(set => set.ExerciseId)
+                .Select(group => group.Average(set => set.Rpe!.Value))
+                .ToList();
+
+            return exerciseAverages.Count > 0
+                ? (int)Math.Round(exerciseAverages.Average(), MidpointRounding.AwayFromZero)
+                : null;
         }
 
         // ──────────────────────────────────────────────
@@ -533,6 +730,52 @@ namespace MobileDevelopment.API.Persistence.Seeding
                 }
             }
             return list;
+        }
+
+        // ──────────────────────────────────────────────
+        // Gyms
+        // ──────────────────────────────────────────────
+
+        private static void SeedGyms(SystemContext ctx)
+        {
+            if (ctx.Gyms.Any())
+            {
+                return;
+            }
+            ctx.Gyms.AddRange(BuildGyms());
+            ctx.SaveChanges();
+        }
+
+        private static async Task SeedGymsAsync(SystemContext ctx, CancellationToken ct)
+        {
+            if (await ctx.Gyms.AnyAsync(ct))
+            {
+                return;
+            }
+            ctx.Gyms.AddRange(BuildGyms());
+            await ctx.SaveChangesAsync(ct);
+        }
+
+        private static IEnumerable<Gym> BuildGyms()
+        {
+            return new List<Gym>
+            {
+                new Gym { Name = "CityFit Rzeszów Plaza", Street = "Rejtana 65", City = "Rzeszów", ZipCode = "35-326", Latitude = 50.0245, Longitude = 22.0156 },
+                new Gym { Name = "Just Gym Rzeszów", Street = "Lubelska 50", City = "Rzeszów", ZipCode = "35-233", Latitude = 50.0521, Longitude = 22.0089 },
+                new Gym { Name = "McFIT Warszawa", Street = "Świętokrzyska 3", City = "Warszawa", ZipCode = "00-049", Latitude = 52.2356, Longitude = 21.0125 },
+                new Gym { Name = "Zdrofit Warszawa Wola", Street = "Towarowa 28", City = "Warszawa", ZipCode = "00-839", Latitude = 52.2301, Longitude = 20.9856 },
+                new Gym { Name = "CityFit Katowice", Street = "Rynek 1", City = "Katowice", ZipCode = "40-003", Latitude = 50.2598, Longitude = 19.0215 },
+                new Gym { Name = "Smart Gym Katowice", Street = "Roździeńskiego 1A", City = "Katowice", ZipCode = "40-202", Latitude = 50.2645, Longitude = 19.0305 },
+                new Gym { Name = "Fitness Platinum Kraków", Street = "Pawia 5", City = "Kraków", ZipCode = "31-154", Latitude = 50.0682, Longitude = 19.9475 },
+                new Gym { Name = "MyFitnessPlace Kraków", Street = "Szlak 77", City = "Kraków", ZipCode = "31-153", Latitude = 50.0715, Longitude = 19.9412 },
+                new Gym { Name = "Fitness Academy Wrocław", Street = "Legnicka 58", City = "Wrocław", ZipCode = "54-204", Latitude = 51.1235, Longitude = 16.9856 },
+                new Gym { Name = "McFIT Wrocław", Street = "Kazimierza Wielkiego 1", City = "Wrocław", ZipCode = "50-077", Latitude = 51.1095, Longitude = 17.0325 },
+                new Gym { Name = "Zdrofit Gdańsk", Street = "Targ Sienny 7", City = "Gdańsk", ZipCode = "80-806", Latitude = 54.3485, Longitude = 18.6456 },
+                new Gym { Name = "CityFit Gdańsk", Street = "Aleja Grunwaldzka 472", City = "Gdańsk", ZipCode = "80-309", Latitude = 54.4056, Longitude = 18.5756 },
+                new Gym { Name = "Just Gym Poznań", Street = "Szwajcarska 14", City = "Poznań", ZipCode = "61-285", Latitude = 52.3925, Longitude = 16.9985 },
+                new Gym { Name = "Fitness Academy Poznań", Street = "Półwiejska 42", City = "Poznań", ZipCode = "61-888", Latitude = 52.4005, Longitude = 16.9325 },
+                new Gym { Name = "Smart Gym Gliwice", Street = "Lipowa 1", City = "Gliwice", ZipCode = "44-100", Latitude = 50.3015, Longitude = 18.6756 }
+            };
         }
     }
 }

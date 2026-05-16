@@ -19,4 +19,13 @@ namespace MobileDevelopment.API.Models.DTO.Diets
         DateTime StartDate,
         DateTime? EndDate
     );
+
+    public sealed record CreateDietWithDaysDto(
+        int UserId,
+        string Name,
+        string? Description,
+        DateTime StartDate,
+        DateTime? EndDate,
+        System.Collections.Generic.IEnumerable<MobileDevelopment.API.Models.DTO.DietDays.CreateDietDayWithMealsDto>? DietDays
+    );
 }

@@ -4,27 +4,36 @@ namespace MobileDevelopment.API.Middlewares
 {
     public sealed class RequestTimeMiddleware : IMiddleware
     {
-        private readonly Stopwatch _stopwatch;
-        private readonly ILogger _logger;
+        private const long SlowRequestThresholdMilliseconds = 500;
+
+        private readonly ILogger<RequestTimeMiddleware> _logger;
 
         public RequestTimeMiddleware(ILogger<RequestTimeMiddleware> logger)
         {
-            _stopwatch = new Stopwatch();
             _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            _stopwatch.Start();
-            await next.Invoke(context);
-            _stopwatch.Stop();
+            var stopwatch = Stopwatch.StartNew();
 
-            var elapsedMiliseconds = _stopwatch.ElapsedMilliseconds;
-
-            if (elapsedMiliseconds / 100  > 4)
+            try
             {
-                var msg = $"Request [{context.Request.Method}] at {context.Request.Path} took {elapsedMiliseconds} ms.";
-                _logger.LogInformation(msg);
+                await next.Invoke(context);
+            }
+            finally
+            {
+                stopwatch.Stop();
+
+                if (stopwatch.ElapsedMilliseconds >= SlowRequestThresholdMilliseconds)
+                {
+                    _logger.LogWarning(
+                        "Slow request {Method} {Path} responded {StatusCode} in {ElapsedMilliseconds} ms.",
+                        context.Request.Method,
+                        context.Request.Path,
+                        context.Response.StatusCode,
+                        stopwatch.ElapsedMilliseconds);
+                }
             }
         }
     }

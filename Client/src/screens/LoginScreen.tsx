@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
 import { Spacing } from '../theme/theme';
 import { useAuthStore } from '../store/useAuthStore';
 import { UserService } from '../api/UserService';
 import { useTheme } from '../context/ThemeContext';
 import Logo from '../components/Logo';
+import ErrorMessage from '../components/ErrorMessage';
+import FormTextInput from '../components/FormTextInput';
+import PrimaryButton from '../components/PrimaryButton';
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -14,7 +16,7 @@ export default function LoginScreen({ navigation }: any) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const setAuth = useAuthStore(state => state.setAuth);
-  const { colors, toggleTheme, isDark } = useTheme();
+  const { colors } = useTheme();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -50,50 +52,31 @@ export default function LoginScreen({ navigation }: any) {
           <Logo subtitleColor={colors.mutedForeground} />
 
           <View style={styles.formContainer}>
-            {errorMessage && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </View>
-            )}
+            <ErrorMessage message={errorMessage} />
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: colors.foreground }]}>Email</Text>
-              <TextInput
-                style={[styles.textInput, { color: colors.foreground, borderColor: colors.border, backgroundColor: 'rgba(255,255,255,0.05)' }]}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Twój email"
-                placeholderTextColor={colors.mutedForeground}
-                autoCapitalize="none"
-              />
-            </View>
+            <FormTextInput
+              label="Email"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Twój email"
+              autoCapitalize="none"
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: colors.foreground }]}>Hasło</Text>
-              <TextInput
-                style={[styles.textInput, { color: colors.foreground, borderColor: colors.border, backgroundColor: 'rgba(255,255,255,0.05)' }]}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="••••••••"
-                placeholderTextColor={colors.mutedForeground}
-                secureTextEntry
-              />
-            </View>
+            <FormTextInput
+              label="Hasło"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••"
+              secureTextEntry
+            />
 
-            <Pressable 
-              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
+            <PrimaryButton
+              title="Zaloguj się"
+              icon="log-in"
               onPress={handleLogin}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#ffffff" />
-              ) : (
-                <>
-                  <Icon name="log-in" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-                  <Text style={styles.loginButtonText}>Zaloguj się</Text>
-                </>
-              )}
-            </Pressable>
+              loading={isLoading}
+              style={styles.loginButton}
+            />
           </View>
 
           <Pressable style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
@@ -110,16 +93,9 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { flex: 1, justifyContent: 'center', paddingHorizontal: Spacing.xl },
   formContainer: { width: '100%' },
-  inputGroup: { marginBottom: Spacing.lg },
-  inputLabel: { fontSize: 14, fontWeight: '500', marginBottom: 8 },
-  textInput: { height: 48, borderRadius: 12, paddingHorizontal: Spacing.md, borderWidth: 1, fontSize: 14 },
-  loginButton: { height: 48, backgroundColor: '#2563eb', borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: Spacing.md, shadowColor: '#2563eb', shadowOpacity: 0.3, shadowRadius: 10, elevation: 4 },
-  loginButtonDisabled: { backgroundColor: '#1d4ed8', opacity: 0.7 },
-  loginButtonText: { fontSize: 16, fontWeight: '600', color: '#ffffff' },
+  loginButton: { marginTop: Spacing.md, shadowColor: '#2563eb', shadowOpacity: 0.3, shadowRadius: 10, elevation: 4 },
   registerLink: { marginTop: Spacing.xl, alignItems: 'center' },
   registerLinkText: { fontSize: 14 },
   registerLinkHighlight: { color: '#3b82f6', fontWeight: '600' },
-  errorContainer: { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 1, borderColor: '#ef4444', borderRadius: 8, padding: 12, marginBottom: Spacing.lg },
-  errorText: { color: '#ef4444', fontSize: 14, textAlign: 'center' },
 });
 

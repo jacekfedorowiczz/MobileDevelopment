@@ -2,8 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.Profiles;
 using MobileDevelopment.API.Models.Wrappers;
-using System.Threading;
-using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Commands.Profile
 {
@@ -18,11 +17,14 @@ namespace MobileDevelopment.API.Services.Commands.Profile
         }
     }
 
-    public sealed class EditProfileCommandHandler : IRequestHandler<EditProfileCommand, Result<ProfileDto>>
+    public sealed class EditProfileCommandHandler(IProfileService profileService) : IRequestHandler<EditProfileCommand, Result<ProfileDto>>
     {
-        public Task<Result<ProfileDto>> Handle(EditProfileCommand request, CancellationToken cancellationToken)
+        public async Task<Result<ProfileDto>> Handle(EditProfileCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var updateResult = await profileService.UpdateAsync(request.Id, request.Dto, cancellationToken);
+            return updateResult.IsSuccess
+                ? await profileService.GetByIdAsync(request.Id, cancellationToken)
+                : Result<ProfileDto>.Failure(updateResult.ErrorMessage!);
         }
     }
 }

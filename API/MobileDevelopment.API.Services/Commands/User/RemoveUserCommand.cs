@@ -27,7 +27,7 @@ namespace MobileDevelopment.API.Services.Commands.User
             }
             catch (Exception e)
             {
-                _logger.LogError("Wystąpił błąd podcas usuwania użytkownika: {Message}", e.Message);
+                _logger.LogError("An error occurred while deleting user: {Message}", e.Message);
                 return Result<bool>.Failure(e.Message);
             }
         }

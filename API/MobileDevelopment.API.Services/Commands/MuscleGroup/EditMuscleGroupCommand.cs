@@ -2,8 +2,6 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.MuscleGroups;
 using MobileDevelopment.API.Models.Wrappers;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobileDevelopment.API.Services.Commands.MuscleGroup
 {
@@ -22,7 +20,7 @@ namespace MobileDevelopment.API.Services.Commands.MuscleGroup
     {
         public Task<Result<MuscleGroupDto>> Handle(EditMuscleGroupCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

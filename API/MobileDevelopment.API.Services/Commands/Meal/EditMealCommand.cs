@@ -2,8 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.Meals;
 using MobileDevelopment.API.Models.Wrappers;
-using System.Threading;
-using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Commands.Meal
 {
@@ -18,11 +17,11 @@ namespace MobileDevelopment.API.Services.Commands.Meal
         }
     }
 
-    public sealed class EditMealCommandHandler : IRequestHandler<EditMealCommand, Result<MealDto>>
+    public sealed class EditMealCommandHandler(IMealService mealService) : IRequestHandler<EditMealCommand, Result<MealDto>>
     {
         public Task<Result<MealDto>> Handle(EditMealCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return mealService.UpdateAsync(request.Id, request.Dto, cancellationToken);
         }
     }
 }

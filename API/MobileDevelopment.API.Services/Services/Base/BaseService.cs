@@ -7,15 +7,10 @@ using MobileDevelopment.API.Services.Model;
 
 namespace MobileDevelopment.API.Services.Services.Base
 {
-    public abstract class BaseService<TEntity, TDto, TCreateEditDto> : IBaseService<TDto, TCreateEditDto>
+    public abstract class BaseService<TEntity, TDto, TCreateEditDto>(IBaseEntityRepository<TEntity> repository) : IBaseService<TDto, TCreateEditDto>
             where TEntity : BaseEntity
     {
-        protected readonly IBaseEntityRepository<TEntity> _repository;
-
-        protected BaseService(IBaseEntityRepository<TEntity> repository)
-        {
-            _repository = repository;
-        }
+        protected readonly IBaseEntityRepository<TEntity> _repository = repository;
 
         public abstract Task<Result<TDto>> GetByIdAsync(int id, CancellationToken token = default);
         public abstract Task<Result<IEnumerable<TDto>>> GetAllAsync(CancellationToken token = default);

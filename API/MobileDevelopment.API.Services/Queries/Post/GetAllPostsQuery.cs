@@ -1,51 +1,35 @@
 using MediatR;
+using FluentValidation;
+using MobileDevelopment.API.Models.DTO.Posts;
+using MobileDevelopment.API.Models.Pagination;
 using MobileDevelopment.API.Models.Wrappers;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Queries.Post
 {
-    public sealed record GetAllPostsQuery(int PageNumber, int PageSize) : IRequest<Result<object>>;
+    public sealed record GetAllPostsQuery(int PageNumber, int PageSize) : IRequest<Result<PagedResult<PostDto>>>;
 
-    public class GetAllPostsQueryHandler : IRequestHandler<GetAllPostsQuery, Result<object>>
+    public sealed class GetAllPostsQueryValidator : AbstractValidator<GetAllPostsQuery>
     {
-        public async Task<Result<object>> Handle(GetAllPostsQuery request, CancellationToken cancellationToken)
+        public GetAllPostsQueryValidator()
         {
-            // pobrać dane z bazy
+            RuleFor(x => x.PageNumber).GreaterThan(0);
+            RuleFor(x => x.PageSize).InclusiveBetween(1, 50);
+        }
+    }
 
-            var posts = new List<object>
-            {
-                new {
-                    id = "1",
-                    user = new { name = "Anna Nowak", avatar = "https://i.pravatar.cc/150?u=anna" },
-                    content = "Dzisiejszy trening pleców wszedł idealnie! Nowy rekord w martwym ciągu - 110kg! 💪🔥",
-                    time = "2 godz. temu",
-                    likes = 45,
-                    comments = 12,
-                    isLiked = true,
-                    tags = new[] { "Trening", "MartwyCiąg", "Rekord" }
-                },
-                new {
-                    id = "2",
-                    user = new { name = "Piotr Wiśniewski", avatar = "https://i.pravatar.cc/150?u=piotr" },
-                    content = "Szukam kogoś do wspólnych treningów na siłowni FitGym w centrum. Ktoś chętny? Trenuję zazwyczaj rano ok. 7:00.",
-                    time = "5 godz. temu",
-                    likes = 18,
-                    comments = 4,
-                    isLiked = false,
-                    tags = new[] { "SzukamPartnera", "FitGym", "RannyTrening" }
-                }
-            };
+    public class GetAllPostsQueryHandler : IRequestHandler<GetAllPostsQuery, Result<PagedResult<PostDto>>>
+    {
+        private readonly IPostService _postService;
 
-            var pagedResponse = new
-            {
-                items = posts,
-                pageNumber = request.PageNumber,
-                totalPages = 1,
-                totalCount = 2,
-                hasPreviousPage = false,
-                hasNextPage = false
-            };
+        public GetAllPostsQueryHandler(IPostService postService)
+        {
+            _postService = postService;
+        }
 
-            return Result<object>.Success(pagedResponse);
+        public Task<Result<PagedResult<PostDto>>> Handle(GetAllPostsQuery request, CancellationToken cancellationToken)
+        {
+            return _postService.GetPagedAsync(request.PageNumber, request.PageSize, cancellationToken);
         }
     }
 }

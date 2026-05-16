@@ -1,17 +1,13 @@
 // src/screens/DashboardScreen.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useTheme } from '../context/ThemeContext';
 import { getDashboardStyles } from './DashboardScreen.styles';
 
 import { DashboardService, DashboardSummaryData } from '../api/DashboardService';
-
-const quickActions = [
-  { title: 'Dieta', description: 'Zaplanuj posiłki', icon: 'apple', stack: 'Training', screen: 'Diet' },
-  { title: 'Plan treningowy', description: 'Dzisiejszy trening', icon: 'activity', stack: 'Training', screen: 'TrainingHub' },
-];
 
 export default function DashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
@@ -19,24 +15,40 @@ export default function DashboardScreen({ navigation }: any) {
 
   const [summaryData, setSummaryData] = useState<DashboardSummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const hasLoadedSummary = useRef(false);
 
-  useEffect(() => {
-    fetchSummary();
+  const fetchSummary = useCallback(async () => {
+    if (!hasLoadedSummary.current) {
+      setIsLoading(true);
+    }
+
+    try {
+      const response = await DashboardService.getSummary();
+      if (response.isSuccess && response.value) {
+        setSummaryData(response.value);
+        hasLoadedSummary.current = true;
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const fetchSummary = async () => {
-    setIsLoading(true);
-    const response = await DashboardService.getSummary();
-    if (response.isSuccess && response.value) {
-      setSummaryData(response.value);
-    }
-    setIsLoading(false);
-  };
+  useFocusEffect(
+    useCallback(() => {
+      fetchSummary();
+    }, [fetchSummary])
+  );
 
   const getTodayDateString = () => {
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
     return new Date().toLocaleDateString('pl-PL', options);
   };
+
+  const weeklyActivity = summaryData?.weeklyActivity ?? [];
+  const maxMinutes = Math.max(...weeklyActivity.map(day => day.minutes), 1);
+  const caloriesProgress = summaryData?.caloriesGoal
+    ? Math.min(100, Math.round((summaryData.caloriesConsumedToday / summaryData.caloriesGoal) * 100))
+    : 0;
 
   if (isLoading) {
     return (
@@ -52,62 +64,89 @@ export default function DashboardScreen({ navigation }: any) {
         <Text style={styles.welcome}>Witaj z powrotem, {summaryData?.firstName || 'Użytkowniku'}!</Text>
         <Text style={styles.date}>{getTodayDateString()}</Text>
 
-        <View style={styles.actionsRow}>
-          {quickActions.map((action, idx) => (
-            <Pressable
-              key={idx}
-              style={styles.actionButton}
-              onPress={() => navigation.navigate(action.stack, { screen: action.screen })}
-            >
-              <View style={styles.actionIconWrapper}>
-                <Icon name={action.icon} size={24} color="#2563eb" />
+        <View style={styles.sectionSeparator} />
+        <View style={styles.heroCards}>
+          <Pressable style={styles.heroCard} onPress={() => navigation.navigate('Training', { screen: 'Diet' })}>
+            <View style={styles.heroHeader}>
+              <View style={styles.heroIconWrapper}>
+                <Icon name="coffee" size={22} color="#2563eb" />
               </View>
-              <Text style={styles.actionTitle}>{action.title}</Text>
-              <Text style={styles.actionDesc}>{action.description}</Text>
-            </Pressable>
-          ))}
+              <Text style={styles.heroTitle}>Dieta</Text>
+            </View>
+            <Text style={styles.heroValue}>{summaryData?.caloriesConsumedToday ?? 0}</Text>
+            <Text style={styles.heroSubtitle}>z {summaryData?.caloriesGoal ?? 0} kcal dzisiaj</Text>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${caloriesProgress}%` }]} />
+            </View>
+            <Text style={styles.macroText}>
+              B {summaryData?.proteinToday ?? 0}g · W {summaryData?.carbsToday ?? 0}g · T {summaryData?.fatToday ?? 0}g
+            </Text>
+          </Pressable>
+
+          <Pressable style={styles.heroCard} onPress={() => navigation.navigate('Training', { screen: 'WorkoutLog' })}>
+            <View style={styles.heroHeader}>
+              <View style={styles.heroIconWrapper}>
+                <Icon name="activity" size={22} color="#2563eb" />
+              </View>
+              <Text style={styles.heroTitle}>Treningi</Text>
+            </View>
+            <Text style={styles.heroValue}>{summaryData?.totalWorkouts ?? 0}</Text>
+            <Text style={styles.heroSubtitle}>treningów w ostatnich 7 dniach</Text>
+            <View style={styles.heroStatsRow}>
+              <Text style={styles.heroStat}>{summaryData?.totalSets ?? 0} serii</Text>
+              <Text style={styles.heroStat}>{summaryData?.workoutMinutesThisWeek ?? 0} min</Text>
+            </View>
+          </Pressable>
         </View>
 
-        {/* Placeholder sections for progress, calories, series, trainings */}
-        <View style={styles.placeholderBox}>
-          <Text style={styles.placeholderText}>Progress</Text>
-        </View>
-
+        <View style={styles.sectionSeparator} />
         <View style={styles.statsRow}>
           <Pressable style={styles.statBox} onPress={() => navigation.navigate('Training', { screen: 'Diet' })}>
             <View style={styles.statIconWrapper}>
-              <Icon name="fire" size={20} color="#2563eb" />
+              <Icon name="zap" size={20} color="#2563eb" />
             </View>
-            <Text style={styles.statValue}>{summaryData?.caloriesBurned || 0}</Text>
-            <Text style={styles.statLabel}>Kalorie</Text>
+            <Text style={styles.statValue}>{summaryData?.caloriesConsumedToday || 0}</Text>
+            <Text style={styles.statLabel}>kcal dzisiaj</Text>
           </Pressable>
           <Pressable style={styles.statBox} onPress={() => navigation.navigate('Training', { screen: 'TrainingHub' })}>
             <View style={styles.statIconWrapper}>
               <Icon name="target" size={20} color="#2563eb" />
             </View>
             <Text style={styles.statValue}>{summaryData?.totalSets || 0}</Text>
-            <Text style={styles.statLabel}>Seria</Text>
+            <Text style={styles.statLabel}>Serie</Text>
           </Pressable>
           <Pressable style={styles.statBox} onPress={() => navigation.navigate('Training', { screen: 'WorkoutLog' })}>
             <View style={styles.statIconWrapper}>
-              <Icon name="dumbbell" size={20} color="#2563eb" />
+              <Icon name="activity" size={20} color="#2563eb" />
             </View>
             <Text style={styles.statValue}>{summaryData?.totalWorkouts || 0}</Text>
             <Text style={styles.statLabel}>Treningi</Text>
           </Pressable>
         </View>
 
+        <View style={styles.sectionSeparator} />
         <Text style={styles.sectionHeader}>Aktywność w tym tygodniu</Text>
-        <View style={styles.placeholderBox}>
-          <Text style={styles.placeholderText}>Bar chart placeholder</Text>
+        <View style={styles.chartCard}>
+          <View style={styles.chartBars}>
+            {weeklyActivity.map(day => (
+              <View key={day.day} style={styles.chartColumn}>
+                <View style={styles.chartBarTrack}>
+                  <View style={[styles.chartBar, { height: `${Math.max(8, (day.minutes / maxMinutes) * 100)}%` }]} />
+                </View>
+                <Text style={styles.chartLabel}>{day.day}</Text>
+                <Text style={styles.chartValue}>{day.minutes}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
+        <View style={styles.sectionSeparator} />
         <Text style={styles.sectionHeader}>Ostatnie treningi</Text>
-        {summaryData?.recentWorkouts?.map((w, i) => (
-          <Pressable 
-            key={i} 
+        {summaryData?.recentWorkouts?.length ? summaryData.recentWorkouts.map(w => (
+          <Pressable
+            key={w.id}
             style={styles.workoutItem}
-            onPress={() => navigation.navigate('Training', { screen: 'WorkoutDetail', params: { id: (i+1).toString() } })}
+            onPress={() => navigation.navigate('Training', { screen: 'WorkoutDetail', params: { id: w.id } })}
           >
             <View>
               <Text style={styles.workoutName}>{w.name}</Text>
@@ -119,7 +158,9 @@ export default function DashboardScreen({ navigation }: any) {
               <Text style={styles.workoutDateText}>{w.date}</Text>
             </View>
           </Pressable>
-        ))}
+        )) : (
+          <Text style={styles.emptyText}>Brak ostatnich treningów.</Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

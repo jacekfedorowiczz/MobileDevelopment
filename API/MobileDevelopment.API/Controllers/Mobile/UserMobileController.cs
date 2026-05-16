@@ -6,6 +6,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using MobileDevelopment.API.Models.DTO.Auth;
 using MobileDevelopment.API.Services.Commands.User;
+using MobileDevelopment.API.Extensions;
 
 namespace MobileDevelopment.API.Controllers.Mobile
 {
@@ -28,10 +29,10 @@ namespace MobileDevelopment.API.Controllers.Mobile
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest("Nie udało się pobrać id użytkownika");
+                return BadRequest(new { Message = "Could not resolve the current user id." });
             }
 
-            return Ok(new { Message = "Udało się pobrać użytkownika z claimów.", UserId = userId });
+            return Ok(new { UserId = userId });
         }
 
         [Authorize]
@@ -40,25 +41,20 @@ namespace MobileDevelopment.API.Controllers.Mobile
         {
             if (string.IsNullOrWhiteSpace(request.RefreshToken))
             {
-                return BadRequest("Brak refresh tokenu.");
+                return BadRequest(new { Message = "Refresh token is required." });
             }
 
             var command = new LogoutCommand(request.RefreshToken);
             var result = await _mediator.Send(command);
 
-            if (!result.IsSuccess)
-            {
-                return BadRequest("Coś poszło nie tak.");
-            }
-
-            return Ok(new { Message = "Wylogowano pomyślnie." });
+            return result.ToActionResult(this);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
             var result = await _mediator.Send(command);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            return result.ToActionResult(this);
         }
 
         [AllowAnonymous]
@@ -66,14 +62,14 @@ namespace MobileDevelopment.API.Controllers.Mobile
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         {
             var result = await _mediator.Send(command);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            return result.ToActionResult(this);
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterCommand command)
         {
             var result = await _mediator.Send(command);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            return result.ToActionResult(this);
         }
     }
 }

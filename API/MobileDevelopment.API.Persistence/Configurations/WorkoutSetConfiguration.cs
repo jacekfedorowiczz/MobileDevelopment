@@ -27,7 +27,7 @@ namespace MobileDevelopment.API.Persistence.Configurations
             builder.HasOne(s => s.Exercise)
                 .WithMany(e => e.Sets)
                 .HasForeignKey(s => s.ExerciseId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

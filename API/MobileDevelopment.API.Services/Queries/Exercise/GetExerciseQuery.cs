@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.Exercises;
 using MobileDevelopment.API.Models.Wrappers;
+using MobileDevelopment.API.Services.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,11 +18,11 @@ namespace MobileDevelopment.API.Services.Queries.Exercise
         }
     }
 
-    public sealed class GetExerciseQueryHandler : IRequestHandler<GetExerciseQuery, Result<ExerciseDto>>
+    public sealed class GetExerciseQueryHandler(IExerciseService exerciseService) : IRequestHandler<GetExerciseQuery, Result<ExerciseDto>>
     {
         public Task<Result<ExerciseDto>> Handle(GetExerciseQuery request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return exerciseService.GetExerciseByIdAsync(request.Id, cancellationToken);
         }
     }
 }

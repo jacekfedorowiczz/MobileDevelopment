@@ -1,3 +1,7 @@
+using MobileDevelopment.API.Domain.Enums;
+using MobileDevelopment.API.Models.DTO.MuscleGroups;
+using MobileDevelopment.API.Models.DTO.WorkoutSets;
+
 namespace MobileDevelopment.API.Models.DTO.Exercises
 {
     public sealed record ExerciseDto(
@@ -5,14 +9,20 @@ namespace MobileDevelopment.API.Models.DTO.Exercises
         string Name,
         string? Description,
         bool IsCompound,
-        System.Collections.Generic.ICollection<MobileDevelopment.API.Models.DTO.MuscleGroups.MuscleGroupDto>? TargetedMuscles = null,
-        System.Collections.Generic.ICollection<MobileDevelopment.API.Models.DTO.WorkoutSets.WorkoutSetDto>? Sets = null
+        bool IsSystem = false,
+        int? CreatedByUserId = null,
+        string? ImageUrl = null,
+        ExerciseDifficulty? Difficulty = null,
+        ICollection<MuscleGroupDto>? TargetedMuscles = null,
+        ICollection<WorkoutSetDto>? Sets = null
     );
 
     public sealed record CreateEditExerciseDto(
         string Name,
         string? Description,
         bool IsCompound,
-        IEnumerable<int> MuscleGroupIds
+        IEnumerable<int> MuscleGroupIds,
+        string? ImageUrl = null,
+        ExerciseDifficulty? Difficulty = null
     );
 }

@@ -1,6 +1,6 @@
 // src/screens/RegisterScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/Feather';
@@ -9,7 +9,10 @@ import { useAuthStore } from '../store/useAuthStore';
 import { UserService } from '../api/UserService';
 import { useTheme } from '../context/ThemeContext';
 import Logo from '../components/Logo';
-import { getRegisterStyles } from './RegisterScreen.styles';
+import BackButton, { backButtonSpacing } from '../components/BackButton';
+import ErrorMessage from '../components/ErrorMessage';
+import FormTextInput from '../components/FormTextInput';
+import PrimaryButton from '../components/PrimaryButton';
 
 export default function RegisterScreen({ navigation }: any) {
   const [firstName, setFirstName] = useState('');
@@ -18,7 +21,7 @@ export default function RegisterScreen({ navigation }: any) {
   const [birthDate, setBirthDate] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,10 +77,7 @@ export default function RegisterScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Icon name="arrow-left" size={16} color={colors.foreground} />
-            <Text style={styles.backButtonText}>Wróć do logowania</Text>
-          </Pressable>
+          <BackButton onPress={() => navigation.goBack()} style={backButtonSpacing} />
 
           <Logo subtitleColor={colors.mutedForeground} />
 
@@ -86,46 +86,34 @@ export default function RegisterScreen({ navigation }: any) {
           </View>
 
           <View style={styles.formContainer}>
-            {error && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{error}</Text>
-              </View>
-            )}
+            <ErrorMessage message={error} />
             <View style={styles.row}>
               <View style={[styles.inputGroup, { flex: 1, marginRight: Spacing.sm }]}>
-                <Text style={styles.inputLabel}>Imię</Text>
-                <TextInput
-                  style={styles.textInput}
+                <FormTextInput
+                  label="Imię"
                   value={firstName}
                   onChangeText={setFirstName}
                   placeholder="Jan"
-                  placeholderTextColor={colors.mutedForeground}
                 />
               </View>
               <View style={[styles.inputGroup, { flex: 1, marginLeft: Spacing.sm }]}>
-                <Text style={styles.inputLabel}>Nazwisko</Text>
-                <TextInput
-                  style={styles.textInput}
+                <FormTextInput
+                  label="Nazwisko"
                   value={lastName}
                   onChangeText={setLastName}
                   placeholder="Kowalski"
-                  placeholderTextColor={colors.mutedForeground}
                 />
               </View>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <TextInput
-                style={styles.textInput}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="twoj@email.com"
-                placeholderTextColor={colors.mutedForeground}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
+            <FormTextInput
+              label="Email"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="twoj@email.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Data urodzenia</Text>
@@ -148,44 +136,29 @@ export default function RegisterScreen({ navigation }: any) {
               )}
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Hasło</Text>
-              <TextInput
-                style={styles.textInput}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="••••••••"
-                placeholderTextColor={colors.mutedForeground}
-                secureTextEntry
-              />
-            </View>
+            <FormTextInput
+              label="Hasło"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••"
+              secureTextEntry
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Powtórz hasło</Text>
-              <TextInput
-                style={styles.textInput}
-                value={repeatPassword}
-                onChangeText={setRepeatPassword}
-                placeholder="••••••••"
-                placeholderTextColor={colors.mutedForeground}
-                secureTextEntry
-              />
-            </View>
+            <FormTextInput
+              label="Powtórz hasło"
+              value={repeatPassword}
+              onChangeText={setRepeatPassword}
+              placeholder="••••••••"
+              secureTextEntry
+            />
 
-            <Pressable 
-              style={[styles.registerButton, isLoading && styles.registerButtonDisabled]} 
+            <PrimaryButton
+              title="Zarejestruj się"
+              icon="user-plus"
               onPress={handleRegister}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#ffffff" />
-              ) : (
-                <>
-                  <Icon name="user-plus" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-                  <Text style={styles.registerButtonText}>Zarejestruj się</Text>
-                </>
-              )}
-            </Pressable>
+              loading={isLoading}
+              style={styles.registerButton}
+            />
 
 
 
@@ -194,3 +167,63 @@ export default function RegisterScreen({ navigation }: any) {
     </SafeAreaView>
   );
 }
+
+const getRegisterStyles = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.xl * 2,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+    marginTop: Spacing.md,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: colors.foreground,
+  },
+  formContainer: {
+    width: '100%',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  inputGroup: {
+    marginBottom: 0,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 8,
+    color: colors.foreground,
+  },
+  calendarInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 48,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  calendarInputText: {
+    flex: 1,
+    fontSize: 14,
+  },
+  registerButton: {
+    marginTop: Spacing.md,
+    shadowColor: '#2563eb',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+});

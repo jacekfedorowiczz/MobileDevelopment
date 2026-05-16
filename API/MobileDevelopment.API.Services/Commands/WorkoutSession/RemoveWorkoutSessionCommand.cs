@@ -1,18 +1,17 @@
 using MediatR;
 using MobileDevelopment.API.Models.Wrappers;
 using MobileDevelopment.API.Services.Interfaces.Commands;
-using System.Threading;
-using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Commands.WorkoutSession
 {
-    public sealed record RemoveWorkoutSessionCommand(int Id) : IRequest<Result<bool>>, IRemoveCommand;
+    public sealed record RemoveWorkoutSessionCommand(int Id) : IRequest<Result>, IRemoveCommand;
 
-    public sealed class RemoveWorkoutSessionCommandHandler : IRequestHandler<RemoveWorkoutSessionCommand, Result<bool>>
+    public sealed class RemoveWorkoutSessionCommandHandler(IWorkoutSessionService workoutSessionService) : IRequestHandler<RemoveWorkoutSessionCommand, Result>
     {
-        public Task<Result<bool>> Handle(RemoveWorkoutSessionCommand request, CancellationToken cancellationToken)
+        public Task<Result> Handle(RemoveWorkoutSessionCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return workoutSessionService.DeleteSessionAsync(request.Id, cancellationToken);
         }
     }
 }

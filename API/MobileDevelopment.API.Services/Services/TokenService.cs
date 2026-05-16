@@ -40,7 +40,7 @@ namespace MobileDevelopment.API.Services.Services
 
         public string GenerateAccessToken(User user)
         {
-            _logger.LogDebug("Generowanie nowego access tokenu.");
+            _logger.LogDebug("Generating a new access token.");
 
             var claims = new List<Claim>
             {
@@ -60,7 +60,7 @@ namespace MobileDevelopment.API.Services.Services
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             );
 
-            _logger.LogDebug("Zakończono generowanie access tokenu.");
+            _logger.LogDebug("Finished generating an access token.");
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
@@ -83,18 +83,17 @@ namespace MobileDevelopment.API.Services.Services
                 ValidIssuer = _jwtSettings.Issuer,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey)),
-                ValidateLifetime = false // ignoruj aby móc pobrać wartość
+                ValidateLifetime = false
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
 
-            // Ochrona przed tokenami, które nie są poprawnymi JWT podpisanymi z użyciem HmacSha256
             if (securityToken is not JwtSecurityToken jwtSecurityToken ||
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
-                _logger.LogError("Wykryto nieprawidłowy token!");
-                throw new SecurityTokenException("Nieprawidłowy token");
+                _logger.LogError("Invalid JWT token detected.");
+                throw new SecurityTokenException("Invalid token.");
             }
 
             return principal;

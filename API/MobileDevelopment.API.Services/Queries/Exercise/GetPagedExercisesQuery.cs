@@ -3,12 +3,18 @@ using MediatR;
 using MobileDevelopment.API.Models.DTO.Exercises;
 using MobileDevelopment.API.Models.Pagination;
 using MobileDevelopment.API.Models.Wrappers;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Queries.Exercise
 {
-    public sealed record GetPagedExercisesQuery(int PageNumber = 1, int PageSize = 10) : IRequest<Result<PagedResult<ExerciseDto>>>;
+    public sealed record GetPagedExercisesQuery(
+        int PageNumber = 1,
+        int PageSize = 10,
+        string? SearchPhrase = null,
+        IEnumerable<int>? MuscleGroupIds = null) : IRequest<Result<PagedResult<ExerciseDto>>>;
 
     public sealed class GetPagedExercisesQueryValidator : AbstractValidator<GetPagedExercisesQuery>
     {
@@ -19,11 +25,16 @@ namespace MobileDevelopment.API.Services.Queries.Exercise
         }
     }
 
-    public sealed class GetPagedExercisesQueryHandler : IRequestHandler<GetPagedExercisesQuery, Result<PagedResult<ExerciseDto>>>
+    public sealed class GetPagedExercisesQueryHandler(IExerciseService exerciseService) : IRequestHandler<GetPagedExercisesQuery, Result<PagedResult<ExerciseDto>>>
     {
         public Task<Result<PagedResult<ExerciseDto>>> Handle(GetPagedExercisesQuery request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return exerciseService.GetPagedExercisesAsync(
+                request.PageNumber,
+                request.PageSize,
+                request.SearchPhrase,
+                request.MuscleGroupIds,
+                cancellationToken);
         }
     }
 }

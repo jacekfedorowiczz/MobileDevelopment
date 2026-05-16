@@ -13,11 +13,13 @@ using MobileDevelopment.API.Persistence.Context;
 using MobileDevelopment.API.Persistence.Extensions;
 using MobileDevelopment.API.Services.Communication;
 using MobileDevelopment.API.Services.Extensions;
+using MobileDevelopment.API.Services.Options;
 using MobileDevelopment.API.Services.Queries.User;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
 using System.Threading.RateLimiting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MobileDevelopment.API
 {
@@ -29,8 +31,7 @@ namespace MobileDevelopment.API
             var services = builder.Services;
 
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
-                .WriteTo.Console()
+                .ReadFrom.Configuration(builder.Configuration)
                 .CreateLogger();
 
             services.AddSerilog();
@@ -38,6 +39,8 @@ namespace MobileDevelopment.API
             var jwtSettings = new JwtSettings { SecretKey = "", Issuer = "", Audience = "" };
             builder.Configuration.GetSection(JwtSettings.SectionName).Bind(jwtSettings);
             services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+            services.Configure<BackgroundWorkerOptions>(
+                builder.Configuration.GetSection(BackgroundWorkerOptions.SectionName));
 
             services.AddControllers();
             services.AddOpenApi();
@@ -106,6 +109,22 @@ namespace MobileDevelopment.API
 
             services.AddResponseCompression();
             services.AddOutputCache();
+            services.AddHealthChecks()
+                .AddDbContextCheck<SystemContext>("database");
+
+            var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+            if (string.IsNullOrWhiteSpace(redisConnectionString))
+            {
+                services.AddDistributedMemoryCache();
+            }
+            else
+            {
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = redisConnectionString;
+                    options.InstanceName = "MobileDevelopment:";
+                });
+            }
 
             // API Versioning
             services.AddApiVersioning(options =>
@@ -153,7 +172,8 @@ namespace MobileDevelopment.API
 
             app.UseHttpsRedirection();
             app.UseResponseCompression();
-
+            
+            app.UseStaticFiles();
             app.UseRouting();
 
             #if DEBUG
@@ -169,6 +189,8 @@ namespace MobileDevelopment.API
 
             app.MapStaticAssets();
             app.MapControllers();
+            app.MapHealthChecks("/health");
+            app.MapHealthChecks("/health/ready");
 
             if (isDevelopmentMode)
             {

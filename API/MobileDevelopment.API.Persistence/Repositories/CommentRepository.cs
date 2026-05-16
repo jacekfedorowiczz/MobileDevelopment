@@ -5,7 +5,7 @@ using MobileDevelopment.API.Persistence.Repositories.Base;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    public class CommentRepository(SystemContext context)
+    public sealed class CommentRepository(SystemContext context)
         : Repository<Comment>(context), ICommentRepository
     {
     }

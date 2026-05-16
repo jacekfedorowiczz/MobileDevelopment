@@ -6,6 +6,7 @@ export interface ActivityDayData {
 }
 
 export interface RecentWorkoutData {
+    id: number;
     name: string;
     exercisesCount: number;
     duration: string;
@@ -15,8 +16,14 @@ export interface RecentWorkoutData {
 export interface DashboardSummaryData {
     firstName: string;
     caloriesBurned: number;
+    caloriesConsumedToday: number;
+    caloriesGoal: number;
+    proteinToday: number;
+    carbsToday: number;
+    fatToday: number;
     totalSets: number;
     totalWorkouts: number;
+    workoutMinutesThisWeek: number;
     weeklyActivity: ActivityDayData[];
     recentWorkouts: RecentWorkoutData[];
 }

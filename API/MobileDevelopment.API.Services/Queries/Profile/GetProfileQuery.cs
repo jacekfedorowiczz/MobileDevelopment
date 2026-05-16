@@ -2,8 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.Profiles;
 using MobileDevelopment.API.Models.Wrappers;
-using System.Threading;
-using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Queries.Profile
 {
@@ -17,11 +16,11 @@ namespace MobileDevelopment.API.Services.Queries.Profile
         }
     }
 
-    public sealed class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, Result<ProfileDto>>
+    public sealed class GetProfileQueryHandler(IProfileService profileService) : IRequestHandler<GetProfileQuery, Result<ProfileDto>>
     {
         public Task<Result<ProfileDto>> Handle(GetProfileQuery request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return profileService.GetByIdAsync(request.Id, cancellationToken);
         }
     }
 }

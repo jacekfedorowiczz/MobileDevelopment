@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MobileDevelopment.API.Domain.Base;
 using MobileDevelopment.API.Models.Pagination;
 using MobileDevelopment.API.Persistence.Context;
@@ -34,43 +34,6 @@ namespace MobileDevelopment.API.Persistence.Repositories.Base
             return await _dbSet.AsNoTracking().ToListAsync(cancellationToken);
         }
 
-        //public async Task<PagedResult<T>> GetPagedAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
-        //{
-        //    return await GetPagedAsync(null, null, true, pageIndex, pageSize, cancellationToken);
-        //}
-
-        //public async Task<PagedResult<T>> GetPagedAsync(
-        //    Expression<Func<T, bool>>? filter,
-        //    Expression<Func<T, object>>? orderBy,
-        //    bool ascending,
-        //    int pageIndex,
-        //    int pageSize,
-        //    CancellationToken cancellationToken = default)
-        //{
-        //    IQueryable<T> query = _dbSet.AsNoTracking();
-
-        //    if (filter is not null)
-        //    {
-        //        query = query.Where(filter);
-        //    }
-
-        //    if (orderBy is not null)
-        //    {
-        //        query = ascending
-        //            ? query.OrderBy(orderBy)
-        //            : query.OrderByDescending(orderBy);
-        //    }
-
-        //    var totalCount = await query.CountAsync(cancellationToken);
-
-        //    var items = await query
-        //        .Skip((pageIndex - 1) * pageSize)
-        //        .Take(pageSize)
-        //        .ToListAsync(cancellationToken);
-
-        //    return new PagedResult<T>(items, totalCount, pageIndex, pageSize);
-        //}
-
         public async Task<T> CreateAsync(T entity, CancellationToken cancellationToken = default)
         {
             await _dbSet.AddAsync(entity, cancellationToken);
@@ -100,6 +63,16 @@ namespace MobileDevelopment.API.Persistence.Repositories.Base
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public void Attach(T entity)
+        {
+            _dbSet.Attach(entity);
+        }
+
+        public void AttachRange(IEnumerable<T> entities)
+        {
+            _dbSet.AttachRange(entities);
         }
 
         public async Task<bool> DeleteRangeAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)

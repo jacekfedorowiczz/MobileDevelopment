@@ -2,55 +2,76 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MobileDevelopment.API.Domain.Entities;
 using MobileDevelopment.API.Persistence.Context;
+using MobileDevelopment.API.Services.Options;
 
 namespace MobileDevelopment.API.Services.Services.Background
 {
     public class TokenCleanupService : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly BackgroundWorkerOptions _options;
         private readonly ILogger<TokenCleanupService> _logger;
 
-        public TokenCleanupService(IServiceScopeFactory scopeFactory, ILogger<TokenCleanupService> logger)
+        public TokenCleanupService(
+            IServiceScopeFactory scopeFactory,
+            IOptions<BackgroundWorkerOptions> options,
+            ILogger<TokenCleanupService> logger)
         {
             _scopeFactory = scopeFactory;
+            _options = options.Value;
             _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Cleanup Refresh Tokenów został uruchomiony.");
+            var interval = TimeSpan.FromHours(Math.Max(1, _options.TokenCleanupIntervalHours));
+            _logger.LogInformation("Refresh token cleanup service started. Interval: {Interval}.", interval);
 
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
+                await RunCleanupAsync(stoppingToken);
+
+                using var timer = new PeriodicTimer(interval);
+                while (await timer.WaitForNextTickAsync(stoppingToken))
                 {
-                    using var scope = _scopeFactory.CreateScope();
-                    var context = scope.ServiceProvider.GetRequiredService<SystemContext>();
-
-                    // Usuwamy tokeny, które wygasły lub zostały unieważnione 1 dzień temu
-                    var expiredDate = DateTime.UtcNow;
-                    var revokedThreshold = DateTime.UtcNow.AddDays(-1);
-
-                    var tokensToDelete = await context.Set<RefreshToken>()
-                        .Where(t => t.ExpiresAt < expiredDate || (t.RevokedAt != null && t.RevokedAt < revokedThreshold))
-                        .ToListAsync(stoppingToken);
-
-                    if (tokensToDelete.Count != 0)
-                    {
-                        context.Set<RefreshToken>().RemoveRange(tokensToDelete);
-                        await context.SaveChangesAsync(stoppingToken);
-                        _logger.LogInformation("Usunięto {Count} starych tokenów sesji.", tokensToDelete.Count);
-                    }
+                    await RunCleanupAsync(stoppingToken);
                 }
-                catch (Exception ex)
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("Refresh token cleanup service stopped.");
+            }
+        }
+
+        private async Task RunCleanupAsync(CancellationToken stoppingToken)
+        {
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<SystemContext>();
+
+                var expiredDate = DateTime.UtcNow;
+                var revokedThreshold = DateTime.UtcNow.AddDays(-Math.Max(0, _options.RevokedTokenRetentionDays));
+
+                var deletedCount = await context.Set<RefreshToken>()
+                    .Where(t => t.ExpiresAt < expiredDate || (t.RevokedAt != null && t.RevokedAt < revokedThreshold))
+                    .ExecuteDeleteAsync(stoppingToken);
+
+                if (deletedCount > 0)
                 {
-                    _logger.LogError(ex, "Wystąpił błąd podczas czyszczenia tokenów.");
+                    _logger.LogInformation("Deleted {Count} expired or revoked refresh tokens.", deletedCount);
                 }
-
-                // wykonaj ponownie co 12h
-                await Task.Delay(TimeSpan.FromHours(12), stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("Refresh token cleanup service stopped.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while cleaning up refresh tokens.");
             }
         }
     }

@@ -1,10 +1,15 @@
 // src/screens/MealCreateScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import { Colors, Spacing } from '../theme/theme';
+import BackButton from '../components/BackButton';
+import { useTheme } from '../context/ThemeContext';
 
 export default function MealCreateScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [mealName, setMealName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -18,14 +23,11 @@ export default function MealCreateScreen({ navigation }: any) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={20} color="#2563eb" />
-          <Text style={styles.backButtonText}>Powrót</Text>
-        </Pressable>
-        <Text style={styles.title}>Nowy posiłek</Text>
-        <View style={{ width: 60 }} />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
+        <BackButton onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Diet')} />
+        <Text style={[styles.title, { color: colors.foreground }]}>Nowy posiłek</Text>
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
@@ -91,11 +93,9 @@ export default function MealCreateScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl, paddingBottom: Spacing.md },
-  backButton: { flexDirection: 'row', alignItems: 'center' },
-  backButtonText: { color: '#2563eb', fontWeight: '500', marginLeft: 4 },
-  title: { fontSize: 18, fontWeight: '600', color: Colors.foreground },
+  title: { fontSize: 18, fontWeight: '600' },
   content: { flex: 1, paddingHorizontal: Spacing.lg },
   scrollContent: { paddingBottom: Spacing.xl },
   inputGroup: { marginBottom: Spacing.lg },

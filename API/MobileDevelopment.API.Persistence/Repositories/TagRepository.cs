@@ -5,7 +5,7 @@ using MobileDevelopment.API.Persistence.Repositories.Base;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    public class TagRepository(SystemContext context)
+    public sealed class TagRepository(SystemContext context)
         : Repository<Tag>(context), ITagRepository
     {
     }

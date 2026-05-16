@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.WorkoutSets;
 using MobileDevelopment.API.Models.Wrappers;
+using MobileDevelopment.API.Services.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,11 +18,11 @@ namespace MobileDevelopment.API.Services.Queries.WorkoutSet
         }
     }
 
-    public sealed class GetWorkoutSetQueryHandler : IRequestHandler<GetWorkoutSetQuery, Result<WorkoutSetDto>>
+    public sealed class GetWorkoutSetQueryHandler(IWorkoutSetService workoutSetService) : IRequestHandler<GetWorkoutSetQuery, Result<WorkoutSetDto>>
     {
         public Task<Result<WorkoutSetDto>> Handle(GetWorkoutSetQuery request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return workoutSetService.GetSetByIdAsync(request.Id, cancellationToken);
         }
     }
 }

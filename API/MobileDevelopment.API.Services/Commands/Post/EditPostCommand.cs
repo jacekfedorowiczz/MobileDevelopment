@@ -2,8 +2,6 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.Posts;
 using MobileDevelopment.API.Models.Wrappers;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobileDevelopment.API.Services.Commands.Post
 {
@@ -22,7 +20,7 @@ namespace MobileDevelopment.API.Services.Commands.Post
     {
         public Task<Result<PostDto>> Handle(EditPostCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

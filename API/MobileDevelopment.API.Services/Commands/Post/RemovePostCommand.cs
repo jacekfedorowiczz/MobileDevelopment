@@ -1,8 +1,6 @@
 using MediatR;
 using MobileDevelopment.API.Models.Wrappers;
 using MobileDevelopment.API.Services.Interfaces.Commands;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobileDevelopment.API.Services.Commands.Post
 {
@@ -12,7 +10,7 @@ namespace MobileDevelopment.API.Services.Commands.Post
     {
         public Task<Result<bool>> Handle(RemovePostCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

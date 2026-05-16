@@ -24,4 +24,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MobileDevelopment.API.Services\MobileDevelopment.API.Services.csproj" />
+    <ProjectReference Include="..\MobileDevelopment.API.Domain\MobileDevelopment.API.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
