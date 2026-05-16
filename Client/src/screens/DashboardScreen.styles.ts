@@ -20,50 +20,90 @@ export const getDashboardStyles = (colors: any) => StyleSheet.create({
     color: colors.mutedForeground, 
     marginBottom: Spacing.xl 
   },
-  actionsRow: {
+  heroCards: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.xl * 1.5,
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
   },
-  actionButton: {
+  heroCard: {
     flex: 1,
-    backgroundColor: colors.secondary,
-    borderRadius: 12,
-    padding: Spacing.sm,
-    marginHorizontal: Spacing.xs,
-    alignItems: 'center',
+    minHeight: 176,
+    backgroundColor: colors.card,
+    borderRadius: 20,
+    padding: Spacing.md,
     borderWidth: 1,
     borderColor: colors.border
   },
-  actionIconWrapper: {
-    marginBottom: Spacing.xs,
+  heroHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md
   },
-  actionTitle: { 
-    fontSize: 16, 
-    fontWeight: '500', 
+  heroIconWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.sm
+  },
+  heroTitle: {
+    fontSize: 16,
+    fontWeight: '700',
     color: colors.foreground 
   },
-  actionDesc: { 
-    fontSize: 12, 
-    color: colors.mutedForeground 
+  heroValue: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: colors.foreground
   },
-  placeholderBox: {
-    height: 120,
-    backgroundColor: colors.secondary,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.xl * 1.5,
-    borderWidth: 1,
-    borderColor: colors.border
+  heroSubtitle: {
+    fontSize: 12,
+    color: colors.mutedForeground,
+    marginTop: 2
   },
-  placeholderText: { 
-    color: colors.mutedForeground 
+  progressTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: colors.muted,
+    overflow: 'hidden',
+    marginTop: Spacing.md
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: '#2563eb'
+  },
+  macroText: {
+    fontSize: 11,
+    color: colors.mutedForeground,
+    marginTop: Spacing.sm
+  },
+  heroStatsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginTop: Spacing.md
+  },
+  heroStat: {
+    color: '#2563eb',
+    fontSize: 12,
+    fontWeight: '700',
+    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8
+  },
+  sectionSeparator: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginBottom: Spacing.md
   },
   statsRow: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
-    marginBottom: Spacing.xl * 1.5 
+    marginBottom: Spacing.md 
   },
   statBox: { 
     alignItems: 'center', 
@@ -92,6 +132,48 @@ export const getDashboardStyles = (colors: any) => StyleSheet.create({
     fontWeight: '600', 
     marginBottom: Spacing.md, 
     color: colors.foreground 
+  },
+  chartCard: {
+    backgroundColor: colors.card,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: Spacing.md,
+    marginBottom: Spacing.md
+  },
+  chartBars: {
+    height: 170,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between'
+  },
+  chartColumn: {
+    flex: 1,
+    alignItems: 'center',
+    height: '100%'
+  },
+  chartBarTrack: {
+    flex: 1,
+    width: 18,
+    borderRadius: 999,
+    backgroundColor: colors.muted,
+    justifyContent: 'flex-end',
+    overflow: 'hidden'
+  },
+  chartBar: {
+    width: '100%',
+    borderRadius: 999,
+    backgroundColor: '#2563eb'
+  },
+  chartLabel: {
+    marginTop: Spacing.sm,
+    fontSize: 11,
+    color: colors.mutedForeground
+  },
+  chartValue: {
+    marginTop: 2,
+    fontSize: 10,
+    color: colors.mutedForeground
   },
   workoutItem: {
     flexDirection: 'row',
@@ -122,5 +204,10 @@ export const getDashboardStyles = (colors: any) => StyleSheet.create({
   workoutDateText: { 
     fontSize: 12, 
     color: colors.mutedForeground 
+  },
+  emptyText: {
+    color: colors.mutedForeground,
+    fontSize: 14,
+    marginBottom: Spacing.xl
   },
 });

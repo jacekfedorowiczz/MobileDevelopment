@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobileDevelopment.API.Attributes;
+using MobileDevelopment.API.Extensions;
 using MobileDevelopment.API.Services.Queries.Dashboard;
 using System.Security.Claims;
 
@@ -29,13 +30,13 @@ namespace MobileDevelopment.API.Controllers.Mobile
 
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(new { Message = "Brak autoryzacji lub id użytkownika w tokenie." });
+                return Unauthorized(new { Message = "Unauthorized or missing user id claim." });
             }
 
             var query = new GetDashboardSummaryQuery(userId);
             var result = await _mediator.Send(query);
 
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            return result.ToActionResult(this);
         }
     }
 }

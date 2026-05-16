@@ -70,6 +70,9 @@ namespace MobileDevelopment.API.Persistence.Extensions
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<IGymRepository, GymRepository>();
+            services.AddScoped<IAchievementRepository, AchievementRepository>();
+            services.AddScoped<IProfileAchievementRepository, ProfileAchievementRepository>();
 
             return services;
         }

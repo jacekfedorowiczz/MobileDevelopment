@@ -36,7 +36,7 @@ namespace MobileDevelopment.API.Services.Queries.Comment
             }
             catch (Exception e)
             {
-                _logger.LogError("Wystąpił błąd podczas pobierania komentarza: {Message}", e.Message);
+                _logger.LogError("An error occurred while fetching comment: {Message}", e.Message);
                 return Result<CommentDto>.Failure(e.Message);
             }
         }

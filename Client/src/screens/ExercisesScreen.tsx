@@ -1,174 +1,345 @@
 // src/screens/ExercisesScreen.tsx
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Image, Pressable, Modal } from 'react-native';
+import React, { useState, useCallback, useRef } from 'react';
+import {
+  View, Text, FlatList, TextInput, Pressable,
+  ActivityIndicator, Modal, Alert
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
-import { Colors, Spacing } from '../theme/theme';
+import { Spacing } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
+import { ExerciseApiService, ExerciseDifficulty, ExerciseDto, MuscleGroupDto } from '../api/ExerciseApiService';
+import { useAuthStore } from '../store/useAuthStore';
+import BackButton, { backButtonSpacing } from '../components/BackButton';
+import { styles } from './ExercisesScreen.styles';
 
-interface Exercise {
-  id: string;
-  name: string;
-  category: string;
-  muscleGroups: string[];
-  difficulty: "Początkujący" | "Średniozaawansowany" | "Zaawansowany";
-  image: string;
-  isCustom: boolean;
-}
-
-const systemExercises: Exercise[] = [
-  {
-    id: "1", name: "Przysiady ze sztangą", category: "Nogi", muscleGroups: ["Czworogłowy", "Pośladki", "Łydki"], difficulty: "Średniozaawansowany",
-    image: "https://images.unsplash.com/photo-1585484764802-387ea30e8432?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", isCustom: false,
-  },
-  {
-    id: "2", name: "Wyciskanie sztangi na ławce płaskiej", category: "Klatka piersiowa", muscleGroups: ["Klatka piersiowa", "Triceps", "Barki"], difficulty: "Średniozaawansowany",
-    image: "https://images.unsplash.com/photo-1652363722833-509b3aac287b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", isCustom: false,
-  },
-  {
-    id: "3", name: "Martwy ciąg", category: "Plecy", muscleGroups: ["Plecy", "Pośladki", "Nogi"], difficulty: "Zaawansowany",
-    image: "https://images.unsplash.com/photo-1606657830879-00d70555b1b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", isCustom: false,
-  },
-  {
-    id: "4", name: "Podciąganie na drążku", category: "Plecy", muscleGroups: ["Plecy", "Biceps"], difficulty: "Średniozaawansowany",
-    image: "https://images.unsplash.com/photo-1677165733273-dcc3724c00e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", isCustom: false,
-  },
-  {
-    id: "5", name: "Wyciskanie sztangi nad głowę", category: "Barki", muscleGroups: ["Barki", "Triceps"], difficulty: "Średniozaawansowany",
-    image: "https://images.unsplash.com/photo-1694856677238-07fe09f6e31a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", isCustom: false,
-  },
-];
-
-const getDifficultyStyle = (difficulty: string) => {
+const getDifficultyLabel = (difficulty?: ExerciseDifficulty) => {
   switch (difficulty) {
-    case "Początkujący": return { color: '#16a34a', backgroundColor: '#f0fdf4' };
-    case "Średniozaawansowany": return { color: '#d97706', backgroundColor: '#fffbeb' };
-    case "Zaawansowany": return { color: '#dc2626', backgroundColor: '#fef2f2' };
-    default: return { color: Colors.foreground, backgroundColor: Colors.secondary };
+    case ExerciseDifficulty.Beginner: return 'Początkujący';
+    case ExerciseDifficulty.Intermediate: return 'Średniozaawansowany';
+    case ExerciseDifficulty.Advanced: return 'Zaawansowany';
+    case ExerciseDifficulty.Elite: return 'Elita';
+    default: return undefined;
   }
 };
 
-export default function ExercisesScreen({ navigation }: any) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showFilterDialog, setShowFilterDialog] = useState(false);
-  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
+const getDifficultyColor = (difficulty?: ExerciseDifficulty) => {
+  switch (difficulty) {
+    case ExerciseDifficulty.Beginner: return '#16a34a';
+    case ExerciseDifficulty.Intermediate: return '#d97706';
+    case ExerciseDifficulty.Advanced: return '#dc2626';
+    case ExerciseDifficulty.Elite: return '#7c3aed';
+    default: return '#6b7280';
+  }
+};
 
-  const toggleGroup = (m: string) => setSelectedGroups(prev => prev.includes(m) ? prev.filter(g => g !== m) : [...prev, m]);
-  const toggleDifficulty = (d: string) => setSelectedDifficulties(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d]);
+import { useFocusEffect } from '@react-navigation/native';
 
-  const filteredExercises = systemExercises.filter(ex => {
-    const matchesSearch = ex.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesGroups = selectedGroups.length === 0 || selectedGroups.some(g => ex.category === g || ex.muscleGroups.includes(g));
-    const matchesDiff = selectedDifficulties.length === 0 || selectedDifficulties.includes(ex.difficulty);
-    return matchesSearch && matchesGroups && matchesDiff;
-  });
+const base64UrlDecode = (value: string) => {
+  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  let output = '';
+  let buffer = 0;
+  let bits = 0;
+
+  for (const char of padded) {
+    if (char === '=') break;
+    const index = chars.indexOf(char);
+    if (index < 0) continue;
+
+    buffer = (buffer << 6) | index;
+    bits += 6;
+
+    if (bits >= 8) {
+      bits -= 8;
+      output += String.fromCharCode((buffer >> bits) & 0xff);
+    }
+  }
+
+  return decodeURIComponent(output.split('').map(char => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`).join(''));
+};
+
+const getAuthUser = (token: string | null) => {
+  if (!token) return { userId: null as number | null, role: null as string | null };
+
+  try {
+    const payload = JSON.parse(base64UrlDecode(token.split('.')[1] ?? ''));
+    const userIdClaim = payload.nameid
+      ?? payload.sub
+      ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+    const role = payload.role
+      ?? payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+    return {
+      userId: Number.isFinite(Number(userIdClaim)) ? Number(userIdClaim) : null,
+      role: typeof role === 'string' ? role : null,
+    };
+  } catch {
+    return { userId: null as number | null, role: null as string | null };
+  }
+};
+
+export default function ExercisesScreen({ navigation, route }: any) {
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const mode = route?.params?.mode;
+  const onSelect = route?.params?.onSelect;
+  const userToken = useAuthStore(state => state.userToken);
+  const currentUser = getAuthUser(userToken);
+
+  const [exercises, setExercises] = useState<ExerciseDto[]>([]);
+  const [muscleGroups, setMuscleGroups] = useState<MuscleGroupDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Refs to hold the latest filter values and avoid stale closures
+  const searchRef = useRef('');
+  const groupIdsRef = useRef<number[]>([]);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const loadMuscleGroups = useCallback(async () => {
+    try {
+      const groups = await ExerciseApiService.getMuscleGroups();
+      setMuscleGroups(groups ?? []);
+    } catch { }
+  }, []);
+
+  const loadExercises = useCallback(async (pageNum: number, replace: boolean, search?: string, groupIds?: number[]) => {
+    try {
+      const result = await ExerciseApiService.getPagedExercises(pageNum, 20, search, groupIds);
+      const items = result?.items ?? [];
+      setExercises(prev => replace ? items : [...prev, ...items]);
+      setHasMore(result?.hasNextPage ?? false);
+      setPage(pageNum);
+    } catch (e: any) {
+      console.error('Load exercises error:', e);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      Promise.all([
+        loadMuscleGroups(),
+        loadExercises(1, true, searchRef.current, groupIdsRef.current.length ? groupIdsRef.current : undefined),
+      ]).finally(() => {
+        if (isActive) setIsLoading(false);
+      });
+
+      return () => {
+        isActive = false;
+      };
+    }, [loadMuscleGroups, loadExercises])
+  );
+
+  const onSearch = (q: string) => {
+    setSearchQuery(q);
+    searchRef.current = q;
+
+    // Debounce: wait 350ms after user stops typing before firing request
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      loadExercises(1, true, searchRef.current, groupIdsRef.current.length ? groupIdsRef.current : undefined);
+    }, 350);
+  };
+
+  const applyFilters = () => {
+    setShowFilter(false);
+    const ids = groupIdsRef.current;
+    loadExercises(1, true, searchRef.current, ids.length ? ids : undefined);
+  };
+
+  const onEndReached = async () => {
+    if (!hasMore || isLoadingMore) return;
+    setIsLoadingMore(true);
+    await loadExercises(page + 1, false, searchRef.current, groupIdsRef.current.length ? groupIdsRef.current : undefined);
+    setIsLoadingMore(false);
+  };
+
+  const toggleGroup = (id: number) => {
+    const next = groupIdsRef.current.includes(id)
+      ? groupIdsRef.current.filter(x => x !== id)
+      : [...groupIdsRef.current, id];
+
+    groupIdsRef.current = next;
+    setSelectedGroupIds(next);
+  };
+
+  const handleDeleteExercise = (id: number, name: string) => {
+    Alert.alert('Usuń ćwiczenie', `Czy na pewno chcesz usunąć ćwiczenie "${name}"?`, [
+      { text: 'Anuluj', style: 'cancel' },
+      {
+        text: 'Usuń', style: 'destructive',
+        onPress: async () => {
+          try {
+            await ExerciseApiService.deleteExercise(id);
+            setExercises(prev => prev.filter(ex => ex.id !== id));
+            Alert.alert('Usunięto', `Ćwiczenie "${name}" zostało usunięte.`);
+          } catch (e: any) {
+            Alert.alert('Błąd', e.message ?? 'Nie udało się usunąć ćwiczenia');
+          }
+        },
+      },
+    ]);
+  };
+
+  const renderItem = ({ item }: { item: ExerciseDto }) => {
+    const muscles = item.targetedMuscles?.map(m => m.name).join(', ') ?? '';
+    const difficultyLabel = getDifficultyLabel(item.difficulty);
+    const diffColor = getDifficultyColor(item.difficulty);
+    const canDelete = mode !== 'pick'
+      && (currentUser.role === 'Administrator' || item.createdByUserId === currentUser.userId);
+
+    return (
+      <Pressable
+        style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
+        onPress={() => {
+          if (mode === 'pick') {
+            onSelect?.(item.id, item.name);
+            navigation.goBack();
+          } else {
+            navigation.navigate('ExerciseDetail', { id: item.id });
+          }
+        }}
+      >
+        <View style={styles.cardBody}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.cardName, { color: colors.foreground }]} numberOfLines={1}>{item.name}</Text>
+            {!!muscles && <Text style={[styles.cardMuscles, { color: colors.mutedForeground }]} numberOfLines={1}>{muscles}</Text>}
+          </View>
+          {!!difficultyLabel && (
+            <View style={[styles.diffBadge, { backgroundColor: diffColor + '20' }]}>
+              <Text style={[styles.diffText, { color: diffColor }]}>{difficultyLabel}</Text>
+            </View>
+          )}
+          {item.isCompound && (
+            <View style={[styles.compoundBadge, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <Text style={[styles.compoundText, { color: colors.mutedForeground }]}>Złożone</Text>
+            </View>
+          )}
+          {canDelete && (
+            <Pressable
+              style={styles.deleteButton}
+              onPress={() => handleDeleteExercise(item.id, item.name)}
+            >
+              <Icon name="trash-2" size={18} color="#ef4444" />
+            </Pressable>
+          )}
+        </View>
+      </Pressable>
+    );
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={20} color={Colors.foreground} />
-        </Pressable>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: colors.background, paddingTop: insets.top + Spacing.sm }]}>
+        <BackButton
+          onPress={() => mode === 'pick' && navigation.getState().index > 0 ? navigation.goBack() : navigation.navigate('TrainingHub')}
+          style={backButtonSpacing}
+        />
         <View style={styles.headerTop}>
           <View>
-            <Text style={styles.title}>Ćwiczenia</Text>
-            <Text style={styles.subtitle}>{filteredExercises.length} dostępnych ćwiczeń</Text>
+            <Text style={[styles.title, { color: colors.foreground }]}>{mode === 'pick' ? 'Wybierz ćwiczenie' : 'Ćwiczenia'}</Text>
+            <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>{exercises.length} dostępnych</Text>
           </View>
           <View style={styles.headerActions}>
-            <Pressable style={styles.iconButton} onPress={() => setShowFilterDialog(true)}>
-              <Icon name="filter" size={20} color={Colors.foreground} />
+            <Pressable style={[styles.iconButton, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => setShowFilter(true)}>
+              <Icon name="filter" size={20} color={selectedGroupIds.length > 0 ? '#3b82f6' : colors.foreground} />
             </Pressable>
-            <Pressable style={[styles.iconButton, styles.iconButtonDestructive]}>
-              <Icon name="trash-2" size={20} color="#ef4444" />
-            </Pressable>
-            <Pressable style={[styles.iconButton, styles.iconButtonPrimary]} onPress={() => navigation.navigate('ExerciseCreate')}>
-              <Icon name="plus" size={20} color="#fff" />
-            </Pressable>
+            {mode !== 'pick' && (
+              <Pressable style={[styles.iconButton, styles.iconButtonPrimary]} onPress={() => navigation.navigate('ExerciseCreate')}>
+                <Icon name="plus" size={20} color="#fff" />
+              </Pressable>
+            )}
           </View>
         </View>
 
-        <View style={styles.searchContainer}>
-          <Icon name="search" size={20} color={Colors.mutedForeground} style={styles.searchIcon} />
+        <View style={[styles.searchContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Icon name="search" size={18} color={colors.mutedForeground} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.foreground }]}
             placeholder="Szukaj ćwiczenia..."
             value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor={Colors.mutedForeground}
+            onChangeText={onSearch}
+            placeholderTextColor={colors.mutedForeground}
           />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => onSearch('')}>
+              <Icon name="x" size={16} color={colors.mutedForeground} />
+            </Pressable>
+          )}
         </View>
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-        {filteredExercises.map(ex => {
-          const diffStyle = getDifficultyStyle(ex.difficulty);
-          return (
-            <Pressable key={ex.id} style={styles.exerciseCard} onPress={() => navigation.navigate('ExerciseDetail', { id: ex.id })}>
-              <Image source={{ uri: ex.image }} style={styles.exerciseImage} />
-              <View style={styles.exerciseInfo}>
-                <View style={styles.exerciseHeader}>
-                  <Text style={styles.exerciseName} numberOfLines={1}>{ex.name}</Text>
-                  {!ex.isCustom && <Icon name="star" size={14} color={Colors.mutedForeground} />}
-                </View>
-                <Text style={styles.exerciseCategory}>{ex.category}</Text>
-                
-                <View style={styles.tagsContainer}>
-                  <Text style={[styles.tag, diffStyle]}>{ex.difficulty}</Text>
-                  {ex.muscleGroups.slice(0, 2).map((m, i) => (
-                    <Text key={i} style={styles.muscleTag}>{m}</Text>
-                  ))}
-                  {ex.muscleGroups.length > 2 && (
-                    <Text style={styles.muscleMoreTag}>+{ex.muscleGroups.length - 2}</Text>
-                  )}
-                </View>
-              </View>
-            </Pressable>
-          );
-        })}
+      {isLoading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#3b82f6" />
+        </View>
+      ) : (
+        <FlatList
+          data={exercises}
+          keyExtractor={item => String(item.id)}
+          renderItem={renderItem}
+          contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + Spacing.xl }]}
+          onEndReached={onEndReached}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={isLoadingMore ? <ActivityIndicator style={{ margin: 16 }} color="#3b82f6" /> : null}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Icon name="search" size={40} color={colors.mutedForeground} />
+              <Text style={[styles.emptyTitle, { color: colors.foreground }]}>Brak ćwiczeń</Text>
+              <Text style={[styles.emptyDesc, { color: colors.mutedForeground }]}>Dodaj pierwsze ćwiczenie lub zmień filtry</Text>
+            </View>
+          }
+        />
+      )}
 
-        {filteredExercises.length === 0 && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateTitle}>Nie znaleziono ćwiczeń</Text>
-            <Text style={styles.emptyStateDesc}>Spróbuj zmienić filtr lub dodaj własne ćwiczenie</Text>
-          </View>
-        )}
-      </ScrollView>
-
-      <Modal visible={showFilterDialog} transparent animationType="fade">
+      {/* Filter Modal */}
+      <Modal visible={showFilter} transparent animationType="slide" onRequestClose={() => setShowFilter(false)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <Pressable style={styles.modalDismiss} onPress={() => setShowFilter(false)} />
+          <View style={[styles.modalSheet, { backgroundColor: colors.card, paddingBottom: insets.bottom + Spacing.lg }]}>
+            <View style={styles.modalHandle} />
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filtruj wyniki</Text>
-              <Pressable onPress={() => setShowFilterDialog(false)} style={styles.closeButton}>
-                <Icon name="x" size={20} color={Colors.foreground} />
+              <Text style={[styles.modalTitle, { color: colors.foreground }]}>Filtruj ćwiczenia</Text>
+              <Pressable onPress={() => {
+                const cleared: number[] = [];
+                setSelectedGroupIds(cleared);
+                groupIdsRef.current = cleared;
+                setShowFilter(false);
+                loadExercises(1, true, searchRef.current, undefined);
+              }}>
+                <Text style={{ color: '#ef4444', fontSize: 14 }}>Wyczyść</Text>
               </Pressable>
             </View>
 
-            <Text style={styles.filterSectionTitle}>Grupa mięśniowa</Text>
-            <View style={styles.filterChips}>
-              {["Klatka piersiowa", "Plecy", "Nogi", "Barki", "Ramiona", "Biceps", "Triceps", "Brzuch"].map(m => {
-                const isActive = selectedGroups.includes(m);
+            <Text style={[styles.filterLabel, { color: colors.mutedForeground }]}>Partie mięśniowe</Text>
+            <View style={styles.chipsContainer}>
+              {muscleGroups.map(mg => {
+                const active = selectedGroupIds.includes(mg.id);
                 return (
-                  <Pressable key={m} style={[styles.chip, isActive && styles.chipActive]} onPress={() => toggleGroup(m)}>
-                    <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{m}</Text>
+                  <Pressable
+                    key={mg.id}
+                    style={[styles.chip, { borderColor: active ? '#3b82f6' : colors.border, backgroundColor: active ? '#3b82f620' : colors.background }]}
+                    onPress={() => toggleGroup(mg.id)}
+                  >
+                    {active && <Icon name="check" size={12} color="#3b82f6" style={{ marginRight: 4 }} />}
+                    <Text style={[styles.chipText, { color: active ? '#3b82f6' : colors.foreground }]}>{mg.name}</Text>
                   </Pressable>
                 );
               })}
             </View>
 
-            <Text style={styles.filterSectionTitle}>Poziom trudności</Text>
-            <View style={styles.filterChips}>
-              {["Początkujący", "Średniozaawansowany", "Zaawansowany"].map(lvl => {
-                const isActive = selectedDifficulties.includes(lvl);
-                return (
-                  <Pressable key={lvl} style={[styles.chip, isActive && styles.chipActive]} onPress={() => toggleDifficulty(lvl)}>
-                    <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{lvl}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <Pressable style={styles.applyButton} onPress={() => setShowFilterDialog(false)}>
-              <Text style={styles.applyButtonText}>Zastosuj filtry</Text>
+            <Pressable style={styles.applyBtn} onPress={() => applyFilters()}>
+              <Text style={styles.applyBtnText}>Zastosuj filtry</Text>
             </Pressable>
           </View>
         </View>
@@ -177,46 +348,3 @@ export default function ExercisesScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md },
-  backButton: { marginBottom: Spacing.md },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg },
-  title: { fontSize: 28, fontWeight: 'bold', color: Colors.foreground },
-  subtitle: { fontSize: 14, color: Colors.mutedForeground, marginTop: 2 },
-  headerActions: { flexDirection: 'row', gap: Spacing.xs },
-  iconButton: { width: 40, height: 40, borderRadius: 12, backgroundColor: Colors.secondary, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Colors.border, marginLeft: Spacing.xs },
-  iconButtonDestructive: { borderColor: 'rgba(239, 68, 68, 0.3)' },
-  iconButtonPrimary: { backgroundColor: '#3b82f6', borderColor: '#3b82f6' },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.secondary, borderRadius: 12, borderWidth: 1, borderColor: Colors.border, paddingHorizontal: Spacing.md, height: 48 },
-  searchIcon: { marginRight: Spacing.sm },
-  searchInput: { flex: 1, fontSize: 16, color: Colors.foreground },
-  content: { flex: 1, paddingHorizontal: Spacing.lg },
-  scrollContent: { paddingBottom: Spacing.xl },
-  exerciseCard: { flexDirection: 'row', backgroundColor: Colors.secondary, borderRadius: 16, overflow: 'hidden', marginBottom: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
-  exerciseImage: { width: 96, height: 96 },
-  exerciseInfo: { flex: 1, padding: Spacing.sm, justifyContent: 'space-between' },
-  exerciseHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  exerciseName: { fontSize: 14, fontWeight: '600', color: Colors.foreground, flex: 1, marginRight: Spacing.sm },
-  exerciseCategory: { fontSize: 12, color: Colors.mutedForeground, marginTop: 2 },
-  tagsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: Spacing.sm, borderTopWidth: 1, borderColor: 'rgba(0,0,0,0.05)', paddingTop: Spacing.sm },
-  tag: { fontSize: 10, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden', fontWeight: '500' },
-  muscleTag: { fontSize: 10, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.border, color: Colors.foreground, overflow: 'hidden' },
-  muscleMoreTag: { fontSize: 10, paddingHorizontal: 6, paddingVertical: 2, color: Colors.mutedForeground },
-  emptyState: { paddingVertical: Spacing.xl * 2, alignItems: 'center' },
-  emptyStateTitle: { fontSize: 16, color: Colors.mutedForeground, marginBottom: Spacing.xs },
-  emptyStateDesc: { fontSize: 14, color: Colors.mutedForeground, textAlign: 'center' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: Spacing.lg },
-  modalContent: { backgroundColor: Colors.background, borderRadius: 24, padding: Spacing.lg },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg },
-  modalTitle: { fontSize: 20, fontWeight: '600', color: Colors.foreground },
-  closeButton: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.secondary },
-  filterSectionTitle: { fontSize: 14, fontWeight: '500', color: Colors.foreground, marginBottom: Spacing.sm },
-  filterChips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.lg },
-  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, backgroundColor: Colors.secondary, borderWidth: 1, borderColor: Colors.border },
-  chipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  chipText: { fontSize: 14, color: Colors.foreground },
-  chipTextActive: { color: '#fff' },
-  applyButton: { backgroundColor: '#2563eb', height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: Spacing.sm },
-  applyButtonText: { color: '#fff', fontSize: 16, fontWeight: '500' },
-});

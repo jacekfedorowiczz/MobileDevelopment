@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import { Spacing } from '../theme/theme';
 import { useTheme } from '../context/ThemeContext';
 import { useWorkoutStore } from '../store/useWorkoutStore';
+import BackButton, { backButtonSpacing } from '../components/BackButton';
 
 const cards = [
   { title: "Treningi", description: "Twój dziennik treningowy", icon: "activity", path: "WorkoutLog", color: "#2563eb" },
@@ -16,18 +18,20 @@ const cards = [
 export default function TrainingScreen({ navigation }: any) {
   const { colors, isDark } = useTheme();
   const { isTraining, activeSession } = useWorkoutStore();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
+        <BackButton onPress={() => navigation.getParent()?.navigate('Dashboard')} style={backButtonSpacing} />
         <Text style={[styles.title, { color: isDark ? '#60a5fa' : '#1e40af' }]}>Trening</Text>
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Wybierz moduł, z którego chcesz skorzystać</Text>
       </View>
 
       {isTraining && activeSession && (
-        <Pressable 
-          style={styles.activeWorkoutBanner} 
-          onPress={() => navigation.navigate('WorkoutLog')} // Zakładam, że tam będzie widok trwającego treningu
+        <Pressable
+          style={styles.activeWorkoutBanner}
+          onPress={() => navigation.navigate('WorkoutLog')}
         >
           <View style={styles.activeIconWrapper}>
             <Icon name="play" size={16} color="#fff" />

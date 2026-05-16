@@ -5,7 +5,7 @@ using MobileDevelopment.API.Persistence.Repositories.Base;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    public class DietDayRepository(SystemContext context)
+    public sealed class DietDayRepository(SystemContext context)
         : Repository<DietDay>(context), IDietDayRepository
     {
     }

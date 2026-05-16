@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.MuscleGroups;
 using MobileDevelopment.API.Models.Wrappers;
+using MobileDevelopment.API.Services.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,11 +18,11 @@ namespace MobileDevelopment.API.Services.Queries.MuscleGroup
         }
     }
 
-    public sealed class GetMuscleGroupQueryHandler : IRequestHandler<GetMuscleGroupQuery, Result<MuscleGroupDto>>
+    public sealed class GetMuscleGroupQueryHandler(IExerciseService exerciseService) : IRequestHandler<GetMuscleGroupQuery, Result<MuscleGroupDto>>
     {
         public Task<Result<MuscleGroupDto>> Handle(GetMuscleGroupQuery request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return exerciseService.GetMuscleGroupByIdAsync(request.Id, cancellationToken);
         }
     }
 }

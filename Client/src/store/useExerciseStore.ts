@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ExerciseDifficulty } from '../api/ExerciseApiService';
 
 export interface Exercise {
   id: string;
@@ -10,6 +11,7 @@ export interface Exercise {
   equipment?: string;
   description?: string;
   imageUrl?: string;
+  difficulty?: ExerciseDifficulty;
   isCustom?: boolean;
 }
 

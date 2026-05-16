@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobileDevelopment.API.Attributes;
+using MobileDevelopment.API.Extensions;
 using MobileDevelopment.API.Services.Queries.Post;
 
 namespace MobileDevelopment.API.Controllers.Mobile
@@ -25,7 +26,7 @@ namespace MobileDevelopment.API.Controllers.Mobile
         {
             var query = new GetAllPostsQuery(page, pageSize);
             var result = await _mediator.Send(query);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            return result.ToActionResult(this);
         }
     }
 }

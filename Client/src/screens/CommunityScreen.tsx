@@ -1,6 +1,7 @@
 // src/screens/CommunityScreen.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import { Spacing } from '../theme/theme';
 import { useTheme } from '../context/ThemeContext';
@@ -19,7 +20,8 @@ const trendingTopics = [
 
 export default function CommunityScreen() {
   const { colors, isDark } = useTheme();
-  
+  const insets = useSafeAreaInsets();
+
   // State
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
@@ -28,13 +30,10 @@ export default function CommunityScreen() {
   const [hasMore, setHasMore] = useState(true);
 
   const fetchPosts = useCallback(async (pageNumber: number, isRefresh = false) => {
-    if (loading) return;
-    
     setLoading(true);
     try {
-      // Wywołanie do Twojego serwisu API
       const response = await PostService.getPostsAsync(pageNumber, 5);
-      
+
       if (response.succeeded && response.data) {
         const newPosts = response.data.items;
         setPosts(prev => isRefresh ? newPosts : [...prev, ...newPosts]);
@@ -42,7 +41,7 @@ export default function CommunityScreen() {
       }
     } catch (error) {
       console.log('API Error (simulation mode):', error);
-      // SYMULACJA DANYCH (jeśli backend jeszcze nie gotowy)
+      // SYMULACJA DANYCH
       if (pageNumber === 1 || isRefresh) {
         setPosts(mockPosts);
         setHasMore(true);
@@ -55,11 +54,11 @@ export default function CommunityScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [loading]);
+  }, []);
 
   useEffect(() => {
     fetchPosts(1);
-  }, []);
+  }, [fetchPosts]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -108,7 +107,7 @@ export default function CommunityScreen() {
 
   const ListHeader = () => (
     <View>
-      <View style={styles.headerContainer}>
+      <View style={[styles.headerContainer, { marginTop: insets.top + Spacing.sm }]}>
         <View>
           <Text style={[styles.title, { color: colors.foreground }]}>Społeczność</Text>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Dziel się postępami i inspiruj innych</Text>
@@ -135,10 +134,10 @@ export default function CommunityScreen() {
         <Icon name="book-open" size={20} color="#2563eb" />
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Porady i artykuły</Text>
       </View>
-      
-      <FlatList 
-        horizontal 
-        showsHorizontalScrollIndicator={false} 
+
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
         style={styles.carousel}
         data={articles}
         keyExtractor={item => item.id.toString()}

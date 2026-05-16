@@ -3,8 +3,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobileDevelopment.API.Attributes;
-using MobileDevelopment.API.Models.Wrappers;
+using MobileDevelopment.API.Extensions;
 using MobileDevelopment.API.Services.Queries.Exercise;
+using MobileDevelopment.API.Services.Queries.WorkoutSession;
 
 namespace MobileDevelopment.API.Controllers.Mobile
 {
@@ -26,14 +27,15 @@ namespace MobileDevelopment.API.Controllers.Mobile
         {
             var query = new GetExercisesQuery();
             var result = await _mediator.Send(query);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            return result.ToActionResult(this);
         }
 
         [HttpGet("sessions")]
         public async Task<IActionResult> GetWorkoutSessions()
         {
-            // Assuming GetWorkoutSessionsQuery exists or will be created
-            return Ok(Result<List<object>>.Success(new List<object>()));
+            var query = new GetWorkoutSessionsQuery();
+            var result = await _mediator.Send(query);
+            return result.ToActionResult(this);
         }
     }
 }

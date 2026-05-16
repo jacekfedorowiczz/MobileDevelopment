@@ -19,6 +19,9 @@ namespace MobileDevelopment.API.Persistence.Context
         public DbSet<DietDay> DietDays { get; set; }
         public DbSet<Meal> Meals { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Gym> Gyms { get; set; }
+        public DbSet<Achievement> Achievements { get; set; }
+        public DbSet<ProfileAchievement> ProfileAchievements { get; set; }
 
         public SystemContext(DbContextOptions<SystemContext> options) : base(options)
         {     

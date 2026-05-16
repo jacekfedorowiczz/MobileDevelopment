@@ -15,12 +15,7 @@ namespace MobileDevelopment.API.Services.Services.UserContext
 
         public CurrentUser? GetCurrentUser()
         {
-            var user = _httpContextAccessor.HttpContext?.User;
-            if (user == null)
-            {
-                throw new InvalidOperationException("Context user is not present.");
-            }
-
+            var user = (_httpContextAccessor.HttpContext?.User) ?? throw new InvalidOperationException("Context user is not present.");
             if (user.Identity == null || !user.Identity.IsAuthenticated)
             {
                 return null;

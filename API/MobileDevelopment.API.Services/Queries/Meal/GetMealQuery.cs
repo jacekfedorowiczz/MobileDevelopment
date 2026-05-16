@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.Meals;
 using MobileDevelopment.API.Models.Wrappers;
+using MobileDevelopment.API.Services.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,11 +18,11 @@ namespace MobileDevelopment.API.Services.Queries.Meal
         }
     }
 
-    public sealed class GetMealQueryHandler : IRequestHandler<GetMealQuery, Result<MealDto>>
+    public sealed class GetMealQueryHandler(IMealService mealService) : IRequestHandler<GetMealQuery, Result<MealDto>>
     {
         public Task<Result<MealDto>> Handle(GetMealQuery request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return mealService.GetByIdAsync(request.Id, cancellationToken);
         }
     }
 }

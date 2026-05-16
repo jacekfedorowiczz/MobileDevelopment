@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobileDevelopment.API.Attributes;
 using System.Security.Claims;
+using MobileDevelopment.API.Models.DTO.Profiles;
+using MobileDevelopment.API.Services.Queries.Profile;
+using MobileDevelopment.API.Services.Commands.Profile;
+using MobileDevelopment.API.Extensions;
 
 namespace MobileDevelopment.API.Controllers.Mobile
 {
@@ -28,24 +32,48 @@ namespace MobileDevelopment.API.Controllers.Mobile
 
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(new { Message = "Brak autoryzacji lub id użytkownika w tokenie." });
+                return Unauthorized(new { Message = "Unauthorized or missing user id claim." });
             }
 
-            // TODO: Zaimplementuj pobieranie profilu za pomocą Mediator (np. GetUserProfileQuery)
-            // var query = new GetUserProfileQuery(userId);
-            // var result = await _mediator.Send(query);
-            // return result.IsSuccess ? Ok(result.Value) : BadRequest(result.ErrorMessage);
+            var query = new GetMyProfileQuery();
+            var result = await _mediator.Send(query);
 
-            // Tymczasowy mock dla frontend'u
-            return Ok(new
+            return result.ToActionResult(this);
+        }
+
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] CreateEditProfileDto dto)
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value 
+                      ?? User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
             {
-                FirstName = "Jan",
-                LastName = "Kowalski",
-                Email = "jan.kowalski@email.com",
-                WorkoutsThisMonth = 24,
-                AverageWorkoutTime = 48,
-                AchievementsCount = 12
-            });
+                return Unauthorized(new { Message = "Unauthorized or missing user id claim." });
+            }
+
+            var command = new UpdateMyProfileCommand(dto);
+            var result = await _mediator.Send(command);
+
+            return result.ToActionResult(this);
+        }
+
+        [HttpPut("me/diet-assumptions")]
+        public async Task<IActionResult> UpdateDietAssumptions([FromBody] CreateEditProfileDto dto)
+        {
+            var command = new UpdateDietAssumptionsCommand(dto);
+            var result = await _mediator.Send(command);
+
+            return result.ToActionResult(this);
+        }
+
+        [HttpPost("me/avatar")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            var command = new UpdateAvatarCommand(file);
+            var result = await _mediator.Send(command);
+            return result.ToActionResult(this);
         }
     }
 }

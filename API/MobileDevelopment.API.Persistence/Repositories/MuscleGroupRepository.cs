@@ -5,7 +5,7 @@ using MobileDevelopment.API.Persistence.Repositories.Base;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    public class MuscleGroupRepository(SystemContext context)
+    public sealed class MuscleGroupRepository(SystemContext context)
         : Repository<MuscleGroup>(context), IMuscleGroupRepository
     {
     }

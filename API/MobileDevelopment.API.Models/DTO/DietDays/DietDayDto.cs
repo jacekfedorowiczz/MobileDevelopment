@@ -14,4 +14,11 @@ namespace MobileDevelopment.API.Models.DTO.DietDays
         DateTime Date,
         string? Notes
     );
+
+    public sealed record CreateDietDayWithMealsDto(
+        int DietId,
+        DateTime Date,
+        string? Notes,
+        System.Collections.Generic.IEnumerable<MobileDevelopment.API.Models.DTO.Meals.CreateEditMealDto>? Meals
+    );
 }

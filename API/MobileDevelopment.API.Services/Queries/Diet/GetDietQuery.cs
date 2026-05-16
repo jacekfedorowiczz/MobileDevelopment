@@ -36,7 +36,7 @@ namespace MobileDevelopment.API.Services.Queries.Diet
             }
             catch (Exception e)
             {
-                _logger.LogError("Wystąpił błąd podczas pobierania diety: {Message}", e.Message);
+                _logger.LogError("An error occurred while fetching diet: {Message}", e.Message);
                 return Result<DietDto>.Failure(e.Message);
             }
         }

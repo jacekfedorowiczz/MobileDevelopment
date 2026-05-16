@@ -17,6 +17,12 @@ namespace MobileDevelopment.API.Persistence.Configurations
             builder.Property(e => e.Description)
                 .HasMaxLength(1024);
 
+            builder.Property(e => e.ImageUrl)
+                .HasMaxLength(2048);
+
+            builder.Property(e => e.Difficulty)
+                .HasConversion<int?>();
+
             builder.Property(e => e.IsCompound)
                 .IsRequired();
 

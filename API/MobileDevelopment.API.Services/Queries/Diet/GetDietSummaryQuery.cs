@@ -1,35 +1,29 @@
 using MediatR;
+using MobileDevelopment.API.Models.DTO.Diets;
 using MobileDevelopment.API.Models.Wrappers;
 using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Queries.Diet
 {
-    public sealed record GetDietSummaryQuery(string UserId) : IRequest<Result<object>>;
+    public sealed record GetDietSummaryQuery(string UserId) : IRequest<Result<DietSummaryDto>>;
 
-    public class GetDietSummaryQueryHandler : IRequestHandler<GetDietSummaryQuery, Result<object>>
+    public class GetDietSummaryQueryHandler : IRequestHandler<GetDietSummaryQuery, Result<DietSummaryDto>>
     {
-        private readonly IDietService _service;
+        private readonly IDietService _dietService;
 
-        public GetDietSummaryQueryHandler(IDietService service)
+        public GetDietSummaryQueryHandler(IDietService dietService)
         {
-            _service = service;
+            _dietService = dietService;
         }
 
-
-        public async Task<Result<object>> Handle(GetDietSummaryQuery request, CancellationToken cancellationToken)
+        public async Task<Result<DietSummaryDto>> Handle(GetDietSummaryQuery request, CancellationToken cancellationToken)
         {
-            // todo: pobrać dane z bazy
-            
-
-            var summary = new
+            if (!int.TryParse(request.UserId, out var userId))
             {
-                CaloriesConsumed = 1800,
-                CaloriesGoal = 2500,
-                Protein = 120,
-                Carbs = 200,
-                Fat = 60
-            };
-            return Result<object>.Success(summary);
+                return Result<DietSummaryDto>.Failure("Invalid user id.");
+            }
+
+            return await _dietService.GetSummaryForUserAsync(userId, cancellationToken);
         }
     }
 }

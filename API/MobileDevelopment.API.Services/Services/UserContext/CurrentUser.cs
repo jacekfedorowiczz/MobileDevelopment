@@ -1,17 +1,10 @@
 ﻿namespace MobileDevelopment.API.Services.Services.UserContext
 {
-    public class CurrentUser
+    public class CurrentUser(string id, string email, IEnumerable<string> roles)
     {
-        public CurrentUser(string id, string email, IEnumerable<string> roles)
-        {
-            Id = id;
-            Email = email;
-            Roles = roles;
-        }
-
-        public string Id { get; set; }
-        public string Email { get; set; }
-        public IEnumerable<string> Roles { get; set; }
+        public string Id { get; set; } = id;
+        public string Email { get; set; } = email;
+        public IEnumerable<string> Roles { get; set; } = roles;
 
         public bool IsInRole(string role) => Roles.Contains(role);
     }

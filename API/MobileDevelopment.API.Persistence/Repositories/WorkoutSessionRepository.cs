@@ -5,10 +5,7 @@ using MobileDevelopment.API.Persistence.Repositories.Base;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    internal sealed class WorkoutSessionRepository : Repository<WorkoutSession>, IWorkoutSessionRepository
+    public sealed class WorkoutSessionRepository(SystemContext context) : Repository<WorkoutSession>(context), IWorkoutSessionRepository
     {
-        public WorkoutSessionRepository(SystemContext context) : base(context)
-        {
-        }
     }
 }

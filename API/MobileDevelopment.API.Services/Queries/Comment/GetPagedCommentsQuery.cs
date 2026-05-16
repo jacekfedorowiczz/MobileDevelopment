@@ -40,7 +40,7 @@ namespace MobileDevelopment.API.Services.Queries.Comment
             }
             catch (Exception e)
             {
-                _logger.LogError("Wystąpił błąd podczas pobierania zpaginowanych komentarzy: {Message}", e.Message);
+                _logger.LogError("An error occurred while fetching paged comments: {Message}", e.Message);
                 return Result<PagedResult<CommentDto>>.Failure(e.Message);
             }
         }

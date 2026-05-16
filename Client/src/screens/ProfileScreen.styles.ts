@@ -97,8 +97,25 @@ export const getProfileStyles = (colors: any, isDark: boolean) => StyleSheet.cre
   sectionTitle: { 
     fontSize: 18, 
     fontWeight: '700', 
-    marginBottom: Spacing.md,
     color: colors.foreground
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.md
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: Spacing.sm,
+    paddingVertical: Spacing.xs
+  },
+  viewAllText: {
+    color: '#2563eb',
+    fontSize: 13,
+    fontWeight: '700',
+    marginRight: 2
   },
   quickActionsContainer: { 
     flexDirection: 'row', 
@@ -148,10 +165,14 @@ export const getProfileStyles = (colors: any, isDark: boolean) => StyleSheet.cre
     width: '48%', 
     padding: Spacing.md, 
     borderRadius: 16, 
-    marginBottom: Spacing.sm 
+    marginBottom: Spacing.sm,
+    position: 'relative',
+    overflow: 'hidden'
   },
   achievementUnlocked: { 
-    backgroundColor: '#3b82f6' 
+    backgroundColor: '#2563eb',
+    borderWidth: 1,
+    borderColor: '#fbbf24'
   },
   achievementLocked: { 
     borderWidth: 1,
@@ -171,6 +192,19 @@ export const getProfileStyles = (colors: any, isDark: boolean) => StyleSheet.cre
   },
   iconLocked: { 
     backgroundColor: colors.muted
+  },
+  achievementMedalBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#fbbf24',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.7)'
   },
   achievementTitleUnlocked: { 
     fontSize: 14, 

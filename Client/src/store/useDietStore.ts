@@ -1,71 +1,186 @@
-// src/store/useDietStore.ts
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-export interface FoodItem {
-  id: string;
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  amount: number; // in grams or units
-}
-
-export interface Meal {
-  id: string;
-  name: string;
-  time: string;
-  items: FoodItem[];
-}
+import { DietApiService, DietDto } from '../api/DietApiService';
+import { DietDayApiService, DietDayDto } from '../api/DietDayApiService';
+import { MealApiService, CreateEditMealDto } from '../api/MealApiService';
 
 interface DietState {
-  dailyMeals: Meal[];
-  targetCalories: number;
-  targetProtein: number;
-  targetCarbs: number;
-  targetFat: number;
-  
+  activeDiet: DietDto | null;
+  activeDay: DietDayDto | null;
+  isLoading: boolean;
+  error: string | null;
+
   // Actions
-  addMeal: (meal: Omit<Meal, 'id'>) => void;
-  removeMeal: (mealId: string) => void;
-  updateMeal: (mealId: string, data: Partial<Meal>) => void;
-  setTargets: (targets: { calories?: number; protein?: number; carbs?: number; fat?: number }) => void;
-  clearDailyMeals: () => void;
+  fetchActiveDiet: () => Promise<void>;
+  selectDay: (dateStr: string) => Promise<void>;
+  createDay: (dateStr: string, notes?: string) => Promise<void>;
+  addMeal: (meal: CreateEditMealDto) => Promise<void>;
+  removeMeal: (mealId: number) => Promise<void>;
+  createDiet: (name: string, calories: number) => Promise<void>;
 }
 
-export const useDietStore = create<DietState>()(
-  persist(
-    (set) => ({
-      dailyMeals: [],
-      targetCalories: 2500,
-      targetProtein: 150,
-      targetCarbs: 250,
-      targetFat: 70,
+export const useDietStore = create<DietState>((set, get) => ({
+  activeDiet: null,
+  activeDay: null,
+  isLoading: false,
+  error: null,
 
-      addMeal: (meal) => set((state) => ({
-        dailyMeals: [...state.dailyMeals, { ...meal, id: Math.random().toString(36).substr(2, 9) }]
-      })),
+  fetchActiveDiet: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      const diets = await DietApiService.getAllDiets();
+      const dietList = Array.isArray(diets) ? diets : [];
+      
+      // Get the first active diet, or the most recent one
+      const currentDiet = dietList.find(d => d.isActive) || dietList[0];
+      
+      if (currentDiet) {
+        // Fetch full details with days and meals
+        const fullDiet = await DietApiService.getDietById(currentDiet.id);
+        
+        // Find today's date
+        const todayStr = new Date().toISOString().split('T')[0];
+        let todayDay = fullDiet.dietDays?.find(d => d.date.startsWith(todayStr));
+        
+        // Auto-create day if not exists
+        if (!todayDay) {
+          todayDay = await DietDayApiService.createDietDay({
+            dietId: fullDiet.id,
+            date: new Date().toISOString()
+          });
+          if (!fullDiet.dietDays) fullDiet.dietDays = [];
+          fullDiet.dietDays.push(todayDay);
+        }
 
-      removeMeal: (mealId) => set((state) => ({
-        dailyMeals: state.dailyMeals.filter(m => m.id !== mealId)
-      })),
-
-      updateMeal: (mealId, data) => set((state) => ({
-        dailyMeals: state.dailyMeals.map(m => m.id === mealId ? { ...m, ...data } : m)
-      })),
-
-      setTargets: (targets) => set((state) => ({
-        ...state,
-        ...targets
-      })),
-
-      clearDailyMeals: () => set({ dailyMeals: [] }),
-    }),
-    {
-      name: 'diet-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+        set({ activeDiet: fullDiet, activeDay: todayDay, isLoading: false });
+      } else {
+        set({ activeDiet: null, activeDay: null, isLoading: false });
+      }
+    } catch (err: any) {
+      set({ error: err.message || 'Wystąpił błąd podczas ładowania diety', isLoading: false });
     }
-  )
-);
+  },
+
+  selectDay: async (dateStr: string) => {
+    const { activeDiet } = get();
+    if (!activeDiet) return;
+
+    let day = activeDiet.dietDays?.find(d => d.date.startsWith(dateStr));
+    
+    if (!day) {
+      try {
+        set({ isLoading: true });
+        day = await DietDayApiService.createDietDay({
+          dietId: activeDiet.id,
+          date: new Date(dateStr).toISOString()
+        });
+        
+        // Update diet in state
+        const updatedDiet = { ...activeDiet };
+        if (!updatedDiet.dietDays) updatedDiet.dietDays = [];
+        updatedDiet.dietDays.push(day);
+        
+        set({ activeDiet: updatedDiet, activeDay: day, isLoading: false });
+      } catch (err: any) {
+        set({ error: err.message, isLoading: false });
+      }
+    } else {
+      set({ activeDay: day });
+    }
+  },
+
+  createDay: async (dateStr: string, notes?: string) => {
+    const { activeDiet } = get();
+    if (!activeDiet) return;
+
+    try {
+      set({ isLoading: true });
+      const existingDay = activeDiet.dietDays?.find(d => d.date.startsWith(dateStr));
+      const day = existingDay ?? await DietDayApiService.createDietDay({
+        dietId: activeDiet.id,
+        date: new Date(dateStr).toISOString(),
+        notes: notes?.trim() || undefined,
+      });
+
+      const updatedDiet = { ...activeDiet, dietDays: [...(activeDiet.dietDays || [])] };
+      if (!existingDay) {
+        updatedDiet.dietDays!.push(day);
+      }
+
+      set({ activeDiet: updatedDiet, activeDay: day, isLoading: false });
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+    }
+  },
+
+  addMeal: async (meal: CreateEditMealDto) => {
+    try {
+      set({ isLoading: true });
+      const newMeal = await MealApiService.createMeal(meal);
+      
+      const { activeDay, activeDiet } = get();
+      if (activeDay && activeDiet) {
+        const updatedDay = { ...activeDay, meals: [...(activeDay.meals || []), newMeal] };
+        
+        const updatedDiet = { ...activeDiet };
+        if (updatedDiet.dietDays) {
+          const dayIndex = updatedDiet.dietDays.findIndex(d => d.id === activeDay.id);
+          if (dayIndex !== -1) {
+            updatedDiet.dietDays[dayIndex] = updatedDay;
+          }
+        }
+        
+        set({ activeDay: updatedDay, activeDiet: updatedDiet, isLoading: false });
+      }
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+    }
+  },
+
+  removeMeal: async (mealId: number) => {
+    try {
+      set({ isLoading: true });
+      await MealApiService.deleteMeal(mealId);
+      
+      const { activeDay, activeDiet } = get();
+      if (activeDay && activeDiet) {
+        const updatedDay = { ...activeDay, meals: activeDay.meals?.filter(m => m.id !== mealId) || [] };
+        
+        const updatedDiet = { ...activeDiet };
+        if (updatedDiet.dietDays) {
+          const dayIndex = updatedDiet.dietDays.findIndex(d => d.id === activeDay.id);
+          if (dayIndex !== -1) {
+            updatedDiet.dietDays[dayIndex] = updatedDay;
+          }
+        }
+        
+        set({ activeDay: updatedDay, activeDiet: updatedDiet, isLoading: false });
+      }
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+    }
+  },
+
+  createDiet: async (name: string, calories: number) => {
+    try {
+      set({ isLoading: true });
+      const { activeDiet } = get();
+      const dto = {
+        userId: 0, // Ignorowane przez backend dla current user
+        name,
+        description: `Target: ${calories} kcal`,
+        startDate: activeDiet?.startDate ?? new Date().toISOString(),
+        endDate: activeDiet?.endDate,
+      };
+
+      if (activeDiet) {
+        await DietApiService.updateDiet(activeDiet.id, dto);
+      } else {
+        await DietApiService.createDiet(dto);
+      }
+
+      await get().fetchActiveDiet();
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+    }
+  }
+}));

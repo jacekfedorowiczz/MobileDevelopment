@@ -7,7 +7,7 @@ namespace MobileDevelopment.API.Services.Calculators
     {
         public decimal CalculateVolume(IEnumerable<WorkoutSet> sets)
         {
-            throw new NotImplementedException();
+            return sets.Sum(set => set.Weight * set.Reps);
         }
     }
 }

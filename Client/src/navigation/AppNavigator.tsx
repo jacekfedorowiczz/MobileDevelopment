@@ -2,9 +2,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
-import { View, Text } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { useTheme } from '../context/ThemeContext';
 
@@ -12,18 +10,22 @@ import DashboardScreen from '../screens/DashboardScreen';
 import TrainingScreen from '../screens/TrainingScreen';
 import CommunityScreen from '../screens/CommunityScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import AchievementsScreen from '../screens/AchievementsScreen';
 import DietScreen from '../screens/DietScreen';
 import ExercisesScreen from '../screens/ExercisesScreen';
 import GymsScreen from '../screens/GymsScreen';
+import GymCreateScreen from '../screens/GymCreateScreen';
 import ToolsScreen from '../screens/ToolsScreen';
 import WorkoutLogScreen from '../screens/WorkoutLogScreen';
 import WorkoutDetailScreen from '../screens/WorkoutDetailScreen';
+import WorkoutCreateScreen from '../screens/WorkoutCreateScreen';
 import ExerciseDetailScreen from '../screens/ExerciseDetailScreen';
 import ExerciseCreateScreen from '../screens/ExerciseCreateScreen';
 import MealCreateScreen from '../screens/MealCreateScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import ReportScreen from '../screens/ReportScreen';
+import DietAssumptionsScreen from '../screens/DietAssumptionsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -35,19 +37,22 @@ function TrainingStack() {
       <Stack.Screen name="Diet" component={DietScreen} />
       <Stack.Screen name="Exercises" component={ExercisesScreen} />
       <Stack.Screen name="Gyms" component={GymsScreen} />
+      <Stack.Screen name="GymCreate" component={GymCreateScreen} />
       <Stack.Screen name="Tools" component={ToolsScreen} />
       <Stack.Screen name="WorkoutLog" component={WorkoutLogScreen} />
       <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
+      <Stack.Screen name="WorkoutCreate" component={WorkoutCreateScreen} />
       <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
       <Stack.Screen name="ExerciseCreate" component={ExerciseCreateScreen} />
       <Stack.Screen name="MealCreate" component={MealCreateScreen} />
+      <Stack.Screen name="DietAssumptions" component={DietAssumptionsScreen} />
       <Stack.Screen name="Report" component={ReportScreen} />
     </Stack.Navigator>
   );
 }
 
 function MainTabs() {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -92,7 +97,10 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {isAuthenticated ? (
-        <Stack.Screen name="Main" component={MainTabs} />
+        <>
+          <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen name="Achievements" component={AchievementsScreen} />
+        </>
       ) : (
         <Stack.Screen name="Auth" component={AuthStack} />
       )}

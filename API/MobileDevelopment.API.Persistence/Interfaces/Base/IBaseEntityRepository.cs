@@ -1,4 +1,4 @@
-﻿using MobileDevelopment.API.Domain.Base;
+using MobileDevelopment.API.Domain.Base;
 using MobileDevelopment.API.Models.Pagination;
 
 namespace MobileDevelopment.API.Persistence.Interfaces.Base
@@ -13,6 +13,8 @@ namespace MobileDevelopment.API.Persistence.Interfaces.Base
         Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> DeleteRangeAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
         Task SaveChangesAsync();
+        void Attach(T entity);
+        void AttachRange(IEnumerable<T> entities);
         Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
         Task<int> CountAsync(CancellationToken cancellationToken = default);
         Task<PagedResult<T>> GetPagedDynamicAsync(

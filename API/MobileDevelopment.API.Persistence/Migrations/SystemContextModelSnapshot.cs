@@ -17,7 +17,7 @@ namespace MobileDevelopment.API.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.7")
+                .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -35,6 +35,41 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.HasIndex("TargetedMusclesId");
 
                     b.ToTable("ExerciseMuscleGroups", (string)null);
+                });
+
+            modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.Achievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AchievementType")
+                        .HasMaxLength(64)
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("IconCode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("TargetValue")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Achievements");
                 });
 
             modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.Comment", b =>
@@ -137,11 +172,24 @@ namespace MobileDevelopment.API.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)");
 
+                    b.Property<int?>("Difficulty")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
+
                     b.Property<bool>("IsCompound")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSystem")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -155,6 +203,57 @@ namespace MobileDevelopment.API.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Exercises");
+                });
+
+            modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.Gym", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ZipCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Gyms");
                 });
 
             modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.Meal", b =>
@@ -296,10 +395,23 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.Property<string>("Avatar")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("CarbsPercentage")
+                        .HasColumnType("int");
+
                     b.Property<string>("CurrentGoal")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
+
+                    b.Property<int?>("DailyCaloriesGoal")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DietType")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int?>("FatPercentage")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("Height")
                         .HasPrecision(5, 2)
@@ -309,6 +421,9 @@ namespace MobileDevelopment.API.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("nvarchar(16)");
+
+                    b.Property<int?>("ProteinPercentage")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -323,6 +438,33 @@ namespace MobileDevelopment.API.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.ProfileAchievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AchievementId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UnlockedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AchievementId");
+
+                    b.HasIndex("ProfileId", "AchievementId")
+                        .IsUnique();
+
+                    b.ToTable("ProfileAchievements");
                 });
 
             modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.RefreshToken", b =>
@@ -491,6 +633,9 @@ namespace MobileDevelopment.API.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("DurationSeconds")
+                        .HasColumnType("int");
+
                     b.Property<int>("ExerciseId")
                         .HasColumnType("int");
 
@@ -657,6 +802,25 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.ProfileAchievement", b =>
+                {
+                    b.HasOne("MobileDevelopment.API.Domain.Entities.Achievement", "Achievement")
+                        .WithMany("ProfileAchievements")
+                        .HasForeignKey("AchievementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MobileDevelopment.API.Domain.Entities.Profile", "Profile")
+                        .WithMany("ProfileAchievements")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Achievement");
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("MobileDevelopment.API.Domain.Entities.User", "User")
@@ -684,7 +848,7 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.HasOne("MobileDevelopment.API.Domain.Entities.Exercise", "Exercise")
                         .WithMany("Sets")
                         .HasForeignKey("ExerciseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MobileDevelopment.API.Domain.Entities.WorkoutSession", "WorkoutSession")
@@ -728,6 +892,11 @@ namespace MobileDevelopment.API.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.Achievement", b =>
+                {
+                    b.Navigation("ProfileAchievements");
+                });
+
             modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.Diet", b =>
                 {
                     b.Navigation("DietDays");
@@ -748,6 +917,11 @@ namespace MobileDevelopment.API.Persistence.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Likes");
+                });
+
+            modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.Profile", b =>
+                {
+                    b.Navigation("ProfileAchievements");
                 });
 
             modelBuilder.Entity("MobileDevelopment.API.Domain.Entities.User", b =>

@@ -23,11 +23,11 @@ namespace MobileDevelopment.API.Services.Queries.Diet
         {
             try
             {
-                return await _service.GetAllAsync(cancellationToken);
+                return await _service.GetAllForCurrentUserAsync(cancellationToken);
             }
             catch (Exception e)
             {
-                _logger.LogError("Wystąpił błąd podczas pobierania diet: {Message}", e.Message);
+                _logger.LogError("An error occurred while fetching diets: {Message}", e.Message);
                 return Result<IEnumerable<DietDto>>.Failure(e.Message);
             }
         }

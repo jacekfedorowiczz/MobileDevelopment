@@ -2,8 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.Diets;
 using MobileDevelopment.API.Models.Wrappers;
-using System.Threading;
-using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Commands.Diet
 {
@@ -18,11 +17,11 @@ namespace MobileDevelopment.API.Services.Commands.Diet
         }
     }
 
-    public sealed class EditDietCommandHandler : IRequestHandler<EditDietCommand, Result<DietDto>>
+    public sealed class EditDietCommandHandler(IDietService dietService) : IRequestHandler<EditDietCommand, Result<DietDto>>
     {
         public Task<Result<DietDto>> Handle(EditDietCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return dietService.UpdateAsync(request.Id, request.Dto, cancellationToken);
         }
     }
 }

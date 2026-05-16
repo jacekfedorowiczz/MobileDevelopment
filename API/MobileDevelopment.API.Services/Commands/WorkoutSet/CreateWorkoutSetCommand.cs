@@ -2,8 +2,7 @@ using FluentValidation;
 using MediatR;
 using MobileDevelopment.API.Models.DTO.WorkoutSets;
 using MobileDevelopment.API.Models.Wrappers;
-using System.Threading;
-using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Commands.WorkoutSet
 {
@@ -17,11 +16,11 @@ namespace MobileDevelopment.API.Services.Commands.WorkoutSet
         }
     }
 
-    public sealed class CreateWorkoutSetCommandHandler : IRequestHandler<CreateWorkoutSetCommand, Result<WorkoutSetDto>>
+    public sealed class CreateWorkoutSetCommandHandler(IWorkoutSetService workoutSetService) : IRequestHandler<CreateWorkoutSetCommand, Result<WorkoutSetDto>>
     {
         public Task<Result<WorkoutSetDto>> Handle(CreateWorkoutSetCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return workoutSetService.CreateSetAsync(request.Dto, cancellationToken);
         }
     }
 }

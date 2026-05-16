@@ -1,8 +1,6 @@
 using MediatR;
 using MobileDevelopment.API.Models.Wrappers;
 using MobileDevelopment.API.Services.Interfaces.Commands;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobileDevelopment.API.Services.Commands.PostLike
 {
@@ -12,7 +10,7 @@ namespace MobileDevelopment.API.Services.Commands.PostLike
     {
         public Task<Result<bool>> Handle(RemovePostLikeCommand request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

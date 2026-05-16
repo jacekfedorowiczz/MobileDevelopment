@@ -27,6 +27,9 @@ namespace MobileDevelopment.API.Persistence.Configurations
                 .HasConversion<string>()
                 .HasMaxLength(32);
 
+            builder.Property(p => p.DietType)
+                .HasMaxLength(64);
+
             builder.HasMany(p => p.Interests)
                 .WithMany(t => t.InterestedProfiles)
                 .UsingEntity(j => j.ToTable("ProfileTags"));

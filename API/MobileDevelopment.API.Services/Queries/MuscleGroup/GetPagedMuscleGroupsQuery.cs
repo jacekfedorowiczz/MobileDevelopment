@@ -5,6 +5,7 @@ using MobileDevelopment.API.Models.Pagination;
 using MobileDevelopment.API.Models.Wrappers;
 using System.Threading;
 using System.Threading.Tasks;
+using MobileDevelopment.API.Services.Interfaces;
 
 namespace MobileDevelopment.API.Services.Queries.MuscleGroup
 {
@@ -19,11 +20,11 @@ namespace MobileDevelopment.API.Services.Queries.MuscleGroup
         }
     }
 
-    public sealed class GetPagedMuscleGroupsQueryHandler : IRequestHandler<GetPagedMuscleGroupsQuery, Result<PagedResult<MuscleGroupDto>>>
+    public sealed class GetPagedMuscleGroupsQueryHandler(IExerciseService exerciseService) : IRequestHandler<GetPagedMuscleGroupsQuery, Result<PagedResult<MuscleGroupDto>>>
     {
         public Task<Result<PagedResult<MuscleGroupDto>>> Handle(GetPagedMuscleGroupsQuery request, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return exerciseService.GetPagedMuscleGroupsAsync(request.PageNumber, request.PageSize, cancellationToken);
         }
     }
 }

@@ -6,12 +6,8 @@ using MobileDevelopment.API.Persistence.Repositories.Base;
 
 namespace MobileDevelopment.API.Persistence.Repositories
 {
-    public sealed class RefreshTokenRepository : Repository<RefreshToken>, IRefreshTokenRepository
+    public sealed class RefreshTokenRepository(SystemContext context) : Repository<RefreshToken>(context), IRefreshTokenRepository
     {
-        public RefreshTokenRepository(SystemContext context) : base(context)
-        {
-        }
-
         public async Task<RefreshToken?> GetByTokenWithUserAsync(string token, CancellationToken cancellationToken = default)
         {
             return await _context.Set<RefreshToken>()
